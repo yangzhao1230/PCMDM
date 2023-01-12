@@ -1,0 +1,7 @@
+[01/01/23 22:23:56][py.warnings][WARNING] - /home/zhao_yang/project/temp_teach/teach/teach-env/lib/python3.9/site-packages/torch/cuda/__init__.py:145: UserWarning: 
+GeForce RTX 3090 with CUDA capability sm_86 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the GeForce RTX 3090 GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+

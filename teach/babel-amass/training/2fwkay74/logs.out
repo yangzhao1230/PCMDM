@@ -1,0 +1,30 @@
+[03/01/23 08:19:35][__main__][INFO] - Training script. The outputs will be stored in:
+[03/01/23 08:19:35][__main__][INFO] - The working directory is:/home/zhao_yang/project/teach/teach/babel-amass/training/2fwkay74
+[03/01/23 08:19:35][__main__][INFO] - Loading libraries
+[03/01/23 08:19:49][__main__][INFO] - Libraries loaded
+[03/01/23 08:19:49][__main__][INFO] - Set the seed to 42
+[03/01/23 08:19:49][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[03/01/23 08:19:55][__main__][INFO] - Loading data module
+[03/01/23 08:21:58][__main__][INFO] - Data module 'babel-amass' loaded
+[03/01/23 08:21:58][__main__][INFO] - Loading model
+[03/01/23 08:21:59][torch.distributed.nn.jit.instantiator][INFO] - Created a temporary directory at /tmp/tmp0ew1pexz
+[03/01/23 08:21:59][torch.distributed.nn.jit.instantiator][INFO] - Writing /tmp/tmp0ew1pexz/_remote_module_non_scriptable.py
+[03/01/23 08:22:01][__main__][INFO] - Model 'teach' loaded
+[03/01/23 08:22:01][__main__][INFO] - Loading logger
+[03/01/23 08:22:01][__main__][INFO] - Logger 'none' ready
+[03/01/23 08:22:01][__main__][INFO] - Loading callbacks
+[03/01/23 08:22:04][OpenGL.acceleratesupport][INFO] - No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+[03/01/23 08:22:06][__main__][INFO] - Callbacks initialized
+[03/01/23 08:22:06][__main__][INFO] - Loading trainer
+[03/01/23 08:22:13][pytorch_lightning.utilities.distributed][INFO] - GPU available: True, used: True
+[03/01/23 08:22:13][pytorch_lightning.utilities.distributed][INFO] - TPU available: False, using: 0 TPU cores
+[03/01/23 08:22:13][pytorch_lightning.utilities.distributed][INFO] - IPU available: False, using: 0 IPUs
+[03/01/23 08:22:13][__main__][INFO] - Trainer initialized
+[03/01/23 08:22:13][__main__][INFO] - Fitting the model..
+[03/01/23 08:23:37][teach.data.babel][INFO] - Processed 6568 sequences and found 3065 invalid cases based on the datatype.
+[03/01/23 08:23:37][teach.data.babel][INFO] - 15849 sequences -- datatype:separate_pairs.
+[03/01/23 08:23:37][teach.data.babel][INFO] - 14.1% of the sequences which are rejected by the sampler in total.
+[03/01/23 08:23:37][teach.data.babel][INFO] - 0.0% of the sequence which are rejected by the sampler, because of the excluded actions.
+[03/01/23 08:23:37][teach.data.babel][INFO] - 14.1% of the sequence which are rejected by the sampler, because they are too short(<0.5 secs) or too long(>25.0 secs).
+[03/01/23 08:23:37][teach.data.babel][INFO] - Discard from BML: 0
+[03/01/23 08:23:37][teach.data.babel][INFO] - Discard not KIT: 0

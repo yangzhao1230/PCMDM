@@ -1,0 +1,24 @@
+[04/01/23 08:45:34][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 08:46:04][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 15:45:33][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 15:45:33][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 15:45:42][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 15:45:42][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 15:46:38][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[04/01/23 15:46:39][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+

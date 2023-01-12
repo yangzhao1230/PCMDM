@@ -1,0 +1,7 @@
+[03/01/23 09:22:32][__main__][INFO] - Training script. The outputs will be stored in:
+[03/01/23 09:22:32][__main__][INFO] - The working directory is:/home/zhao_yang/project/teach/teach/babel-amass/training/28s2xu9f
+[03/01/23 09:22:32][__main__][INFO] - Loading libraries
+[03/01/23 09:22:40][__main__][INFO] - Libraries loaded
+[03/01/23 09:22:40][__main__][INFO] - Set the seed to 42
+[03/01/23 09:22:40][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[03/01/23 09:22:40][__main__][INFO] - Loading data module

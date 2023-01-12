@@ -1,0 +1,18 @@
+[02/01/23 18:07:12][__main__][INFO] - Training script. The outputs will be stored in:
+[02/01/23 18:07:12][__main__][INFO] - The working directory is:/home/zhao_yang/project/teach/teach/babel-amass/training/23sdo5lv
+[02/01/23 18:07:12][__main__][INFO] - Loading libraries
+[02/01/23 18:07:13][__main__][INFO] - Libraries loaded
+[02/01/23 18:07:13][__main__][INFO] - Set the seed to 42
+[02/01/23 18:07:13][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[02/01/23 18:07:13][__main__][INFO] - Loading data module
+[02/01/23 18:07:15][__main__][INFO] - Data module 'babel-amass' loaded
+[02/01/23 18:07:15][__main__][INFO] - Loading model
+[02/01/23 18:07:15][torch.distributed.nn.jit.instantiator][INFO] - Created a temporary directory at /tmp/tmpp1gze7ph
+[02/01/23 18:07:15][torch.distributed.nn.jit.instantiator][INFO] - Writing /tmp/tmpp1gze7ph/_remote_module_non_sriptable.py
+[02/01/23 18:07:17][__main__][INFO] - Model 'teach' loaded
+[02/01/23 18:07:17][__main__][INFO] - Loading logger
+[02/01/23 18:07:17][__main__][INFO] - Logger 'none' ready
+[02/01/23 18:07:17][__main__][INFO] - Loading callbacks
+[02/01/23 18:07:21][OpenGL.acceleratesupport][INFO] - No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+[02/01/23 18:07:23][__main__][INFO] - Callbacks initialized
+[02/01/23 18:07:23][__main__][INFO] - Loading trainer

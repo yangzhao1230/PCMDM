@@ -1,0 +1,25 @@
+[01/01/23 22:33:54][__main__][INFO] - Training script. The outputs will be stored in:
+[01/01/23 22:33:54][__main__][INFO] - The working directory is:/home/zhao_yang/project/teach/teach/babel-amass/baseline/21873h0n
+[01/01/23 22:33:54][__main__][INFO] - Loading libraries
+[01/01/23 22:33:56][__main__][INFO] - Libraries loaded
+[01/01/23 22:33:56][__main__][INFO] - Set the seed to 42
+[01/01/23 22:33:56][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[01/01/23 22:33:56][__main__][INFO] - Loading data module
+[01/01/23 22:33:56][__main__][INFO] - Data module 'babel-amass' loaded
+[01/01/23 22:33:56][__main__][INFO] - Loading model
+[01/01/23 22:33:56][torch.distributed.nn.jit.instantiator][INFO] - Created a temporary directory at /tmp/tmps2c9fexj
+[01/01/23 22:33:56][torch.distributed.nn.jit.instantiator][INFO] - Writing /tmp/tmps2c9fexj/_remote_module_non_sriptable.py
+[01/01/23 22:33:58][__main__][INFO] - Model 'teach' loaded
+[01/01/23 22:33:58][__main__][INFO] - Loading logger
+[01/01/23 22:33:58][__main__][INFO] - Logger 'none' ready
+[01/01/23 22:33:58][__main__][INFO] - Loading callbacks
+[01/01/23 22:33:58][OpenGL.acceleratesupport][INFO] - No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+[01/01/23 22:33:59][__main__][INFO] - Callbacks initialized
+[01/01/23 22:33:59][__main__][INFO] - Loading trainer
+[01/01/23 22:33:59][pytorch_lightning.utilities.distributed][INFO] - GPU available: True, used: True
+[01/01/23 22:33:59][pytorch_lightning.utilities.distributed][INFO] - TPU available: False, using: 0 TPU cores
+[01/01/23 22:33:59][pytorch_lightning.utilities.distributed][INFO] - IPU available: False, using: 0 IPUs
+[01/01/23 22:33:59][__main__][INFO] - Trainer initialized
+[01/01/23 22:33:59][__main__][INFO] - Fitting the model..
+[01/01/23 22:33:59][teach.data.babel][INFO] - Processed 0 sequences and found 0 invalid cases based on the datatype.
+[01/01/23 22:33:59][teach.data.babel][INFO] - 0 sequences -- datatype:separate_pairs.

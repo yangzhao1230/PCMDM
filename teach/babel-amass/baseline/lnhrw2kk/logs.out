@@ -1,0 +1,27 @@
+[02/01/23 18:35:45][__main__][INFO] - Training script. The outputs will be stored in:
+[02/01/23 18:35:45][__main__][INFO] - The working directory is:/home/zhao_yang/project/teach/teach/babel-amass/baseline/lnhrw2kk
+[02/01/23 18:35:45][__main__][INFO] - Loading libraries
+[02/01/23 18:35:47][__main__][INFO] - Libraries loaded
+[02/01/23 18:35:47][__main__][INFO] - Set the seed to 42
+[02/01/23 18:35:47][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[02/01/23 18:35:47][__main__][INFO] - Loading data module
+[02/01/23 18:35:49][__main__][INFO] - Data module 'babel-amass' loaded
+[02/01/23 18:35:49][__main__][INFO] - Loading model
+[02/01/23 18:35:49][torch.distributed.nn.jit.instantiator][INFO] - Created a temporary directory at /tmp/tmp3smebfx6
+[02/01/23 18:35:49][torch.distributed.nn.jit.instantiator][INFO] - Writing /tmp/tmp3smebfx6/_remote_module_non_scriptable.py
+[02/01/23 18:35:51][__main__][INFO] - Model 'teach' loaded
+[02/01/23 18:35:51][__main__][INFO] - Loading logger
+[02/01/23 18:35:51][__main__][INFO] - Logger 'none' ready
+[02/01/23 18:35:51][__main__][INFO] - Loading callbacks
+[02/01/23 18:35:52][OpenGL.acceleratesupport][INFO] - No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+[02/01/23 18:35:53][__main__][INFO] - Callbacks initialized
+[02/01/23 18:35:53][__main__][INFO] - Loading trainer
+[02/01/23 18:35:55][pytorch_lightning.utilities.distributed][INFO] - GPU available: True, used: True
+[02/01/23 18:35:55][pytorch_lightning.utilities.distributed][INFO] - TPU available: False, using: 0 TPU cores
+[02/01/23 18:35:55][pytorch_lightning.utilities.distributed][INFO] - IPU available: False, using: 0 IPUs
+[02/01/23 18:35:55][__main__][INFO] - Trainer initialized
+[02/01/23 18:35:55][__main__][INFO] - Fitting the model..
+[02/01/23 18:36:09][__main__][INFO] - Fitting done
+[02/01/23 18:36:09][__main__][INFO] - The checkpoints are stored in /home/zhao_yang/project/teach/teach/babel-amass/baseline/lnhrw2kk/checkpoints
+[02/01/23 18:36:09][__main__][INFO] - Training done. Reminder, the outputs are stored in:
+/home/zhao_yang/project/teach/teach/babel-amass/baseline/lnhrw2kk

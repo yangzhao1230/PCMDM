@@ -1,0 +1,58 @@
+[03/01/23 09:17:45][__main__][INFO] - Training script. The outputs will be stored in:
+[03/01/23 09:17:45][__main__][INFO] - The working directory is:/home/zhao_yang/project/teach/teach/babel-amass/training/2893wj60
+[03/01/23 09:17:45][__main__][INFO] - Loading libraries
+[03/01/23 09:17:52][__main__][INFO] - Libraries loaded
+[03/01/23 09:17:52][__main__][INFO] - Set the seed to 42
+[03/01/23 09:17:52][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[03/01/23 09:17:52][__main__][INFO] - Loading data module
+[03/01/23 09:17:56][__main__][INFO] - Data module 'babel-amass' loaded
+[03/01/23 09:17:56][__main__][INFO] - Loading model
+[03/01/23 09:17:56][torch.distributed.nn.jit.instantiator][INFO] - Created a temporary directory at /tmp/tmpnz7t0tw0
+[03/01/23 09:17:56][torch.distributed.nn.jit.instantiator][INFO] - Writing /tmp/tmpnz7t0tw0/_remote_module_non_scriptable.py
+[03/01/23 09:17:57][__main__][INFO] - Model 'teach' loaded
+[03/01/23 09:17:57][__main__][INFO] - Loading logger
+[03/01/23 09:17:57][__main__][INFO] - Logger 'none' ready
+[03/01/23 09:17:57][__main__][INFO] - Loading callbacks
+[03/01/23 09:17:58][OpenGL.acceleratesupport][INFO] - No OpenGL_accelerate module loaded: No module named 'OpenGL_accelerate'
+[03/01/23 09:17:58][__main__][INFO] - Callbacks initialized
+[03/01/23 09:17:58][__main__][INFO] - Loading trainer
+[03/01/23 09:18:00][pytorch_lightning.utilities.distributed][INFO] - GPU available: True, used: True
+[03/01/23 09:18:00][pytorch_lightning.utilities.distributed][INFO] - TPU available: False, using: 0 TPU cores
+[03/01/23 09:18:00][pytorch_lightning.utilities.distributed][INFO] - IPU available: False, using: 0 IPUs
+[03/01/23 09:18:00][__main__][INFO] - Trainer initialized
+[03/01/23 09:18:00][__main__][INFO] - Fitting the model..
+[03/01/23 09:19:05][teach.data.babel][INFO] - Processed 6568 sequences and found 3065 invalid cases based on the datatype.
+[03/01/23 09:19:05][teach.data.babel][INFO] - 15849 sequences -- datatype:separate_pairs.
+[03/01/23 09:19:05][teach.data.babel][INFO] - 14.1% of the sequences which are rejected by the sampler in total.
+[03/01/23 09:19:05][teach.data.babel][INFO] - 0.0% of the sequence which are rejected by the sampler, because of the excluded actions.
+[03/01/23 09:19:05][teach.data.babel][INFO] - 14.1% of the sequence which are rejected by the sampler, because they are too short(<0.5 secs) or too long(>25.0 secs).
+[03/01/23 09:19:05][teach.data.babel][INFO] - Discard from BML: 0
+[03/01/23 09:19:05][teach.data.babel][INFO] - Discard not KIT: 0
+[03/01/23 09:19:29][teach.data.babel][INFO] - Processed 2183 sequences and found 977 invalid cases based on the datatype.
+[03/01/23 09:19:29][teach.data.babel][INFO] - 5672 sequences -- datatype:separate_pairs.
+[03/01/23 09:19:29][teach.data.babel][INFO] - 16.27% of the sequences which are rejected by the sampler in total.
+[03/01/23 09:19:29][teach.data.babel][INFO] - 0.0% of the sequence which are rejected by the sampler, because of the excluded actions.
+[03/01/23 09:19:29][teach.data.babel][INFO] - 16.27% of the sequence which are rejected by the sampler, because they are too short(<0.5 secs) or too long(>25.0 secs).
+[03/01/23 09:19:29][teach.data.babel][INFO] - Discard from BML: 0
+[03/01/23 09:19:29][teach.data.babel][INFO] - Discard not KIT: 0
+[03/01/23 09:19:29][pytorch_lightning.accelerators.gpu][INFO] - LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [1]
+[03/01/23 09:19:29][pytorch_lightning.callbacks.model_summary][INFO] - 
+  | Name          | Type                 | Params
+-------------------------------------------------------
+0 | textencoder   | TextHist             | 76.1 M
+1 | motionencoder | ActorAgnosticEncoder | 4.8 M 
+2 | motiondecoder | ActorAgnosticDecoder | 6.4 M 
+3 | _losses       | MetricCollection     | 0     
+4 | metrics       | ComputeMetricsTeach  | 0     
+-------------------------------------------------------
+20.8 M    Trainable params
+66.4 M    Non-trainable params
+87.2 M    Total params
+348.807   Total estimated model params size (MB)
+[03/01/23 09:19:37][teach.callback.progress][INFO] - Sanity checking ok.
+[03/01/23 09:19:37][pytorch_lightning.utilities.seed][INFO] - Global seed set to 42
+[03/01/23 09:19:37][teach.callback.progress][INFO] - Training started
+[03/01/23 09:22:03][__main__][INFO] - Fitting done
+[03/01/23 09:22:03][__main__][INFO] - The checkpoints are stored in /home/zhao_yang/project/teach/teach/babel-amass/training/2893wj60/checkpoints
+[03/01/23 09:22:03][__main__][INFO] - Training done. Reminder, the outputs are stored in:
+/home/zhao_yang/project/teach/teach/babel-amass/training/2893wj60

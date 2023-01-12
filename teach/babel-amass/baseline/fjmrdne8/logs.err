@@ -1,0 +1,6 @@
+[02/01/23 08:12:38][py.warnings][WARNING] - /home/zhao_yang/project/temp_teach/teach/teach-env/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[02/01/23 09:24:03][py.warnings][WARNING] - /home/zhao_yang/project/temp_teach/teach/teach-env/lib/python3.9/site-packages/pytorch_lightning/trainer/trainer.py:688: UserWarning: Detected KeyboardInterrupt, attempting graceful shutdown...
+  rank_zero_warn("Detected KeyboardInterrupt, attempting graceful shutdown...")
+

@@ -1,0 +1,6 @@
+[03/01/23 09:50:38][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/torch/nn/_reduction.py:42: UserWarning: size_average and reduce args will be deprecated, please use reduction='mean' instead.
+  warnings.warn(warning.format(ret))
+
+[03/01/23 09:50:42][py.warnings][WARNING] - /home/zhao_yang/anaconda3/envs/composition/lib/python3.9/site-packages/pytorch_lightning/loops/optimization/optimizer_loop.py:145: UserWarning: `training_step` returned `None`. If this was on purpose, ignore this warning...
+  self.warning_cache.warn(
+
