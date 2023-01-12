@@ -100,6 +100,8 @@ class TrainLoop:
         self.use_ddp = False
         self.ddp_model = self.model
 
+        self.hist_frames = args.hist_frames
+
     def _load_and_sync_parameters(self):
         resume_checkpoint = find_resume_checkpoint() or self.resume_checkpoint
 
@@ -323,7 +325,7 @@ class TrainLoop:
             micro_cond_1['y']['length'] = batch['length_1_with_transition']
             micro_cond_1['y']['mask'] = lengths_to_mask(batch['length_1_with_transition'], micro_1.device).unsqueeze(1).unsqueeze(2)
             micro_cond_1['y']['text'] = batch['text_1']
-            micro_cond_1['y']['hframes'] = hframes
+            micro_cond_1['y']['hframes'] = hframes[:,:,:,-self.hist_frames:]
             # micro_cond = cond
             
             #t, weights = self.schedule_sampler.sample(micro_0.shape[0], dist_util.dev())

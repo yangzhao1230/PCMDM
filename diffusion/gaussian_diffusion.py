@@ -662,6 +662,7 @@ class GaussianDiffusion:
         
     def p_sample_loop_multi(
         self,
+        hist_frames,
         model,
         shape_0,
         shape_1,
@@ -706,6 +707,7 @@ class GaussianDiffusion:
 
         for i, sample in enumerate(self.p_sample_loop_progressive_multi(
             model,
+            hist_frames,
             shape_0=shape_0,
             shape_1=shape_1,
             noise=noise,
@@ -800,6 +802,7 @@ class GaussianDiffusion:
 
     def p_sample_loop_progressive_multi(
         self,
+        hist_frames,
         model,
         shape_0,
         shape_1,
@@ -825,7 +828,7 @@ class GaussianDiffusion:
         Returns a generator over dicts, where each dict is the return value of
         p_sample().
         """
-        hist_frames = 0 # 0
+        # hist_frames = 0 # 0
 
         if device is None:
             device = next(model.parameters()).device
@@ -1512,7 +1515,7 @@ class GaussianDiffusion:
         :return: a dict with the key "loss" containing a tensor of shape [N].
                  Some mean or variance settings may also have other keys.
         """
-        hist_frames = 0 #TODO
+        # hist_frames = 0 #TODO
         # enc = model.model._modules['module']
         
         enc = model.model
@@ -1628,7 +1631,7 @@ class GaussianDiffusion:
         else:
             raise NotImplementedError(self.loss_type)
 
-        return terms, model_output[:,:,:,-hist_frames:]
+        return terms, model_output
 
     def fc_loss_rot_repr(self, gt_xyz, pred_xyz, mask):
         def to_np_cpu(x):
