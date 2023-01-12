@@ -187,7 +187,7 @@ class MDM(nn.Module):
                 else:
                     output = self.seqTransEncoder(xseq)[1:]
             else:
-                token_mask = torch.ones((bs, 7), dtype=bool, device=x.device)
+                token_mask = torch.ones((bs, 2 + self.hist_frames), dtype=bool, device=x.device)
                 aug_mask = torch.cat((token_mask, mask), 1)
                 sep_token = torch.tile(self.seperation_token, (bs,)).reshape(bs, -1).unsqueeze(0)
                 hframes = y['hframes'].squeeze(2).permute(2, 0, 1) #TODO find out the diff 

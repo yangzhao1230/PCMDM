@@ -22,7 +22,7 @@ from einops import rearrange
 from torch import Tensor
 from teach.info.joints import smplh_to_mmm_scaling_factor
 from teach.info.joints import smplh2mmm_indexes
-import hydra
+# import hydra
 from .base import Rots2Joints
 
 

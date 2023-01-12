@@ -51,7 +51,7 @@ class TrainLoop:
         self.global_batch = self.batch_size # * dist.get_world_size()
         self.num_steps = args.num_steps
         self.num_epochs = self.num_steps // len(self.data) + 1
-
+        print(f"Total Epochs: {self.num_epochs}")
         self.sync_cuda = torch.cuda.is_available()
 
         self._load_and_sync_parameters()
