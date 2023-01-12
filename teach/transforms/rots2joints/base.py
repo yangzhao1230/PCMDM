@@ -20,7 +20,7 @@ import torch
 from torch import Tensor, nn
 from pathlib import Path
 import os
-import hydra
+# import hydra
 
 class Rots2Joints(nn.Module):
     def __init__(self, path: Optional[str] = None,
