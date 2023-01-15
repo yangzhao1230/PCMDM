@@ -19,7 +19,7 @@ from data_loaders.humanml.networks.evaluator_wrapper import EvaluatorMDMWrapper
 from eval import eval_humanml, eval_humanact12_uestc
 from data_loaders.get_data import get_dataset_loader
 
-from teach.data.tools import lengths_to_mask
+from teach.data.tools import lengths_to_mask    
 # For ImageNet experiments, this was a good default value.
 # We found that the lg_loss_scale quickly climbed to
 # 20-21 within the first ~1K steps of training.
@@ -313,10 +313,15 @@ class TrainLoop:
             )
             if last_batch or not self.use_ddp:
                 # hist_frames [b 5 dim]
-                loss0, hframes = compute_losses0() 
+                loss0, hist = compute_losses0() 
             else:
                 with self.ddp_model.no_sync():
-                    loss0, hframes = compute_losses0() 
+                    loss0, hist = compute_losses0() 
+
+            # bs 135 1 frames
+            # bs = hist.shape(0)
+            hist_lst = [feats[:,:,:len] for feats, len in zip(hist, batch['length_0'])]
+            hframes = torch.stack([x[:,:,-self.hist_frames:] for x in hist_lst])
 
             micro_1 = batch['motion_feats_1_with_transition']
             micro_1 = micro_1.unsqueeze(2).permute(0, 3, 2, 1)
@@ -325,7 +330,7 @@ class TrainLoop:
             micro_cond_1['y']['length'] = batch['length_1_with_transition']
             micro_cond_1['y']['mask'] = lengths_to_mask(batch['length_1_with_transition'], micro_1.device).unsqueeze(1).unsqueeze(2)
             micro_cond_1['y']['text'] = batch['text_1']
-            micro_cond_1['y']['hframes'] = hframes[:,:,:,-self.hist_frames:]
+            micro_cond_1['y']['hframes'] = hframes
             # micro_cond = cond
             
             #t, weights = self.schedule_sampler.sample(micro_0.shape[0], dist_util.dev())

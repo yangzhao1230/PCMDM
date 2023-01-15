@@ -196,7 +196,7 @@ class MDM(nn.Module):
                 xseq = torch.cat((emb, hframes_emb, sep_token, x), axis=0)
                 # TODO add attention mask
                 xseq = self.sequence_pos_encoder(xseq)  # [seqlen+1, bs, d]
-                output = self.seqTransEncoder(xseq, src_key_padding_mask=~aug_mask)[7:]  # , src_key_padding_mask=~maskseq)  # [seqlen, bs, d]
+                output = self.seqTransEncoder(xseq, src_key_padding_mask=~aug_mask)[2 + self.hist_frames:]  # , src_key_padding_mask=~maskseq)  # [seqlen, bs, d]
             
 
         elif self.arch == 'trans_dec':
