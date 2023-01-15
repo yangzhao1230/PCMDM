@@ -50,7 +50,7 @@ def get_dataset_loader(args, name, batch_size, num_frames, split='train', hml_mo
         collate = get_collate_fn(name, hml_mode)
     else:
         from data_loaders.multi_motion.data.dataset import BABEL
-        datapath = '/home/zhao_yang/project/teach/data/babel/babel-smplh-30fps-male'
+        datapath = '../teach/data/babel/babel-smplh-30fps-male'
         framerate = 30
         dtype = 'separate_pairs'
         from teach.transforms.smpl import SMPLTransform
@@ -58,14 +58,14 @@ def get_dataset_loader(args, name, batch_size, num_frames, split='train', hml_mo
         from teach.transforms.rots2joints import SMPLH
         from teach.transforms.rots2rfeats import Globalvelandy
         rifke = Rifke(jointstype='mmm', forward_filter=False,
-            path='/home/zhao_yang/project/teach/deps/transforms/joints2jfeats/rifke/babel-amass',
+            path='../teach/deps/transforms/joints2jfeats/rifke/babel-amass',
             normalization=True
             )
-        smplh = SMPLH(path='/home/zhao_yang/project/teach/data/smpl_models/smplh',
+        smplh = SMPLH(path='../teach/data/smpl_models/smplh',
             jointstype='mmm', input_pose_rep='matrix', batch_size=16, gender='male')
         globalvelandy = Globalvelandy(canonicalize=True, pose_rep='rot6d', offset=True,
-            path='/home/zhao_yang/project/teach/deps/transforms/rots2rfeats/globalvelandy/rot6d/babel-amass',
-            # path='/home/zhao_yang/project/teach/deps/transforms/rots2rfeats/globalvelandy/rot6d/babel-amass/separate_pairs',
+            path='../teach/deps/transforms/rots2rfeats/globalvelandy/rot6d/babel-amass',
+            # path='../teach/deps/transforms/rots2rfeats/globalvelandy/rot6d/babel-amass/separate_pairs',
             normalization=True)
         transforms = SMPLTransform(rots2rfeats=globalvelandy, rots2joints=smplh,
             joints2jfeats=rifke)
