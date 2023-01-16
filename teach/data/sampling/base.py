@@ -28,7 +28,7 @@ class FrameSampler:
     # max_len: int = 1000
     max_len: int = 750 
     # min_len: int = 10
-    min_len: int = 15
+    min_len: int = 10
 
     def __call__(self, num_frames):
         from .frames import get_frameix_from_data_index
