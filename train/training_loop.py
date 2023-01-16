@@ -328,9 +328,9 @@ class TrainLoop:
             micro_1 = batch['motion_feats_1_with_transition']
             micro_1 = micro_1.unsqueeze(2).permute(0, 3, 2, 1)
             micro_cond_1 = {}
+            micro_cond_1['y'] = {}
             if self.hist_frames > 0:
                 micro_cond_1['y']['hframes'] = hframes
-            micro_cond_1['y'] = {}
             micro_cond_1['y']['length'] = batch['length_1_with_transition']
             micro_cond_1['y']['mask'] = lengths_to_mask(batch['length_1_with_transition'], micro_1.device).unsqueeze(1).unsqueeze(2)
             micro_cond_1['y']['text'] = batch['text_1']
