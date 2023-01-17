@@ -74,7 +74,7 @@ def visualize_meshes(vertices, pcd=None, multi_col=None, text="",
     mesh_rec = vertices
     if use_hydra_path:
         with open(os.devnull, "w") as f, contextlib.redirect_stdout(f):
-            smpl = get_body_model(path=f'{get_original_cwd()}/data/smpl_models',
+            smpl = get_body_model(path=f'../teach/data/smpl_models',
                                 model_type='smpl', gender='neutral',
                                 batch_size=1, device='cpu')
     else:
