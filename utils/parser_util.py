@@ -75,7 +75,7 @@ def add_diffusion_options(parser):
 def add_model_options(parser):
     group = parser.add_argument_group('model')
     group.add_argument("--arch", default='trans_enc',
-                       choices=['trans_enc', 'trans_dec', 'gru', 'past_cond'], type=str,
+                       choices=['trans_enc', 'trans_dec', 'gru', 'past_cond', 'inpainting'], type=str,
                        help="Architecture types as reported in the paper.")
     group.add_argument("--emb_trans_dec", default=False, type=bool,
                        help="For trans_dec architecture only, if true, will inject condition as a class token"
@@ -90,11 +90,13 @@ def add_model_options(parser):
     group.add_argument("--lambda_rcxyz", default=0.0, type=float, help="Joint positions loss.")
     group.add_argument("--lambda_vel", default=0.0, type=float, help="Joint velocity loss.")
     group.add_argument("--lambda_fc", default=0.0, type=float, help="Foot contact loss.")
+    group.add_argument("--lambda_cycle", default=0.0, type=float, help="Foot contact loss.")
     group.add_argument("--unconstrained", action='store_true',
                        help="Model is trained unconditionally. That is, it is constrained by neither text nor action. "
                             "Currently tested on HumanAct12 only.")
     group.add_argument("--hist_frames", default=0, type=int, help="hist_frames")
     group.add_argument("--motion_mask", default=True, type=bool, help="if mask")
+    group.add_argument("--inpainting_frames", default=4, type=int, help="inpainting_frames")
 
 def add_data_options(parser):
     group = parser.add_argument_group('dataset')

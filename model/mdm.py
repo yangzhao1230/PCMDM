@@ -59,7 +59,7 @@ class MDM(nn.Module):
                 # self.hist_frames = 5
                 self.seperation_token = nn.Parameter(torch.randn(latent_dim))
                 self.skel_embedding = nn.Linear(self.njoints, self.latent_dim)
-        if self.arch == 'trans_enc' or self.arch == 'past_cond':
+        if self.arch == 'trans_enc' or self.arch == 'past_cond' or self.arch == 'inpainting':
             print("TRANS_ENC init")
             seqTransEncoderLayer = nn.TransformerEncoderLayer(d_model=self.latent_dim,
                                                               nhead=self.num_heads,
@@ -175,9 +175,9 @@ class MDM(nn.Module):
             xseq = self.sequence_pos_encoder(xseq)  # [seqlen+1, bs, d]
             output = self.seqTransEncoder(xseq)[1:]  # , src_key_padding_mask=~maskseq)  # [seqlen, bs, d]
 
-        elif self.arch == 'past_cond':
+        elif self.arch == 'past_cond' or self.arch == 'inpainting':
             mask = lengths_to_mask(y['length'], x.device)
-            if self.hist_frames == 0 or y.get('hframes', None) == None:
+            if self.arch == 'inpainting' or self.hist_frames == 0 or y.get('hframes', None) == None:
                 token_mask = torch.ones((bs, 1), dtype=bool, device=x.device)
                 aug_mask = torch.cat((token_mask, mask), 1)
                 xseq = torch.cat((emb, x), axis=0)  # [seqlen+1, bs, d]
