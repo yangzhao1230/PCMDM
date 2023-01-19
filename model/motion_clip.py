@@ -79,7 +79,7 @@ class MotionClip(pl.LightningModule):
         text_rep = self.text_encoder(text)
         text_rep = self.text_proj_head(text_rep)
 
-        loss = self.forward(motion_rep, text_rep)
+        _, _, loss = self.forward(motion_rep, text_rep)
 
         self.log("train_loss", loss)
 
