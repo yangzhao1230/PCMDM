@@ -16,7 +16,7 @@
 
 from typing import List, Dict
 from torch import Tensor
-
+import torch
 
 def collate_tensor_with_padding(batch: List[Tensor]) -> Tensor:
     dims = batch[0].dim()
@@ -96,4 +96,18 @@ def collate_text_and_length(lst_elements: Dict) -> Dict:
     otherkeys = [x for x in lst_elements[0].keys() if x not in batch and x != "datastruct"]
     for key in otherkeys:
         batch[key] = [x[key] for x in lst_elements]
+    return batch
+
+def collate_contrastive(lst_elements: List, ) -> Dict:
+    concat_lst = [{
+        "features": torch.cat((el["features_0"], el["features_1_with_transition"]), axis=0),
+        "length":   el["length_0"] + el["length_1_with_transition"],
+        "text": el["text_0"] + ", " + el["text_1"]
+    } for el in lst_elements]
+
+    batch = {"motion_feats": collate_tensor_with_padding([el["features"] for el in concat_lst]),
+            "length": [x["length"] for x in concat_lst], 
+            "text": [x["text"] for x in concat_lst]
+            }
+
     return batch
