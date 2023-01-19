@@ -44,7 +44,7 @@ class PretrainDataModule(LightningDataModule):
             joints2jfeats=rifke)
         frame_sampler = FrameSampler()
         frame_sampler.max_len = 256
-        tiny = True
+        tiny = False
         self.dataset = BABEL(datapath=datapath, framerate=framerate, dtype=dtype, transforms=transforms, tiny=tiny, FrameSampler=frame_sampler)
         # datatype = 'separate_pairs'
         self.collate = collate_contrastive
