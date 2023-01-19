@@ -20,6 +20,9 @@ class TextEncoder(nn.Module):
 
     def forward(self, raw_text):
 
-        texts = self.tokenizer(raw_text, padding='max_length', return_tensors="pt", max_length=22, truncation=True)
-        output = self.clip_model(**texts)['pooler_output'] 
+        device = next(self.parameters()).device
+        text = self.tokenizer(raw_text, padding='max_length', return_tensors="pt", max_length=22, truncation=True)
+        input_ids = text["input_ids"]
+        attention_mask = text["attention_mask"]
+        output = self.clip_model(input_ids.to(device), attention_mask.to(device))['pooler_output'] 
         return output
