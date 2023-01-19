@@ -6,6 +6,7 @@ import numpy as np
 from torch.nn import TransformerEncoder, TransformerEncoderLayer
 import torch.nn.functional as F
 import math
+from teach.data.tools import lengths_to_mask
 
 def timestep_embedding(timesteps, dim, max_period=10000):
     """
@@ -25,17 +26,6 @@ def timestep_embedding(timesteps, dim, max_period=10000):
     if dim % 2:
         embedding = torch.cat([embedding, torch.zeros_like(embedding[:, :1])], dim=-1)
     return embedding
-
-def lengths_to_mask(lengths: List[int], device: torch.device):
-    """
-    Generate mask array.
-    """
-    lengths = lengths.clone().detach()
-    max_len = max(lengths)
-    mask = torch.arange(max_len, device=device).expand(
-        len(lengths), max_len
-    ) < lengths.unsqueeze(1)
-    return mask
 
 class MotionEncoder(nn.Module):
     def __init__(
