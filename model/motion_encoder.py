@@ -90,10 +90,10 @@ class MotionEncoder(nn.Module):
         )  # extend mask for CLS token and length token
         mask_ext = torch.cat([mask_cls_len, mask], dim=1)
 
-        encoder_out = self.motion_encoder(
+        out = self.motion_encoder(
             src=input_tokens_pe, src_key_padding_mask=~mask_ext
         )  # mask_ext: (N,T+1)
-        out = self.last_projection(encoder_out)
+        # out = self.last_projection(encoder_out)
 
         output_dict = {
             "pooler_output": out[:, 0, :],
