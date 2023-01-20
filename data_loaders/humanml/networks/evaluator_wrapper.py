@@ -1,6 +1,7 @@
 from data_loaders.humanml.networks.modules import *
 from data_loaders.humanml.utils.word_vectorizer import POS_enumerator
 from os.path import join as pjoin
+from model.motion_clip import MotionClip
 
 def build_models(opt):
     movement_enc = MovementConvEncoder(opt.dim_pose-4, opt.dim_movement_enc_hidden, opt.dim_movement_latent)
@@ -185,3 +186,67 @@ class EvaluatorMDMWrapper(object):
             m_lens = m_lens // self.opt['unit_length']
             motion_embedding = self.motion_encoder(movements, m_lens)
         return motion_embedding
+
+class EvaluatorCCDWrapper(object):
+
+    def __init__(self, dataset_name, device):
+        opt = {
+            'dataset_name': dataset_name,
+            'device': device,
+            'dim_word': 300,
+            'max_motion_length': 196,
+            'dim_pos_ohot': len(POS_enumerator),
+            'dim_motion_hidden': 1024,
+            'max_text_len': 20,
+            'dim_text_hidden': 512,
+            'dim_coemb_hidden': 512,
+            'dim_pose': 263 if dataset_name == 'humanml' else 251,
+            'dim_movement_enc_hidden': 512,
+            'dim_movement_latent': 512,
+            'checkpoints_dir': '/home/zhao_yang/project/temp/TEACH/all_checkpoints/MotipnClip.ckpt',
+            'unit_length': 4,
+        }
+        self.model = MotionClip.load_from_checkpoint(opt["checkpoints_dir"])
+        # self.text_encoder, self.motion_encoder, self.movement_encoder = build_evaluators(opt)
+        self.opt = opt
+        self.device = opt['device']
+
+        self.model.to(opt['device'])
+        # self.motion_encoder.to(opt['device'])
+        # self.movement_encoder.to(opt['device'])
+
+        # self.text_encoder.eval()
+        # self.motion_encoder.eval()
+        self.model.eval()
+
+    # Please note that the results does not following the order of inputs
+    def get_co_embeddings(self, motions, lengths, texts):
+        with torch.no_grad():
+            # word_embs = word_embs.detach().to(self.device).float()
+            # pos_ohot = pos_ohot.detach().to(self.device).float()
+            motions = motions.detach().to(self.device).float()
+            lengths = lengths.detach().to(self.device).float()
+            '''Motions Encoding'''
+            # align_idx = np.argsort(m_lens.data.tolist())[::-1].copy()
+            # motions = motions[align_idx]
+            # m_lens = m_lens[align_idx]
+            motion_rep = self.model.motion_encoder(motions, lengths)
+            motion_rep = self.model.motion_proj_head(motion_rep)
+            '''Texts Encoding'''
+            # movements = self.movement_encoder(motions[..., :-4]).detach()
+            # m_lens = m_lens // self.opt['unit_length']
+            # motion_embedding = self.motion_encoder(movements, m_lens)
+            text_rep = self.text_encoder(texts)
+            text_rep = self.text_proj_head(text_rep)
+
+        return motion_rep, text_rep
+
+    # Please note that the results does not following the order of inputs
+    def get_motion_embeddings(self, motions, lengths):
+        with torch.no_grad():
+            motions = motions.detach().to(self.device).float()
+            lengths = lengths.detach().to(self.device).float()
+
+            motion_rep = self.model.motion_encoder(motions, lengths)
+            motion_rep = self.model.motion_proj_head(motion_rep)
+        return motion_rep

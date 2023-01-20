@@ -5,6 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from os.path import join as pjoin
 from tqdm import tqdm
 from utils import dist_util
+from teach.data.tools import lengths_to_mask 
 
 def build_models(opt):
     if opt.text_enc_mod == 'bigru':
@@ -232,6 +233,176 @@ class CompMDMGeneratedDataset(Dataset):
         self.generated_motion = generated_motion
         self.mm_generated_motion = mm_generated_motions
         self.w_vectorizer = dataloader.dataset.w_vectorizer
+
+
+    def __len__(self):
+        return len(self.generated_motion)
+
+
+    def __getitem__(self, item):
+        data = self.generated_motion[item]
+        motion, m_length, caption, tokens = data['motion'], data['length'], data['caption'], data['tokens']
+        sent_len = data['cap_len']
+
+        if self.dataset.mode == 'eval':
+            normed_motion = motion
+            denormed_motion = self.dataset.t2m_dataset.inv_transform(normed_motion)
+            renormed_motion = (denormed_motion - self.dataset.mean_for_eval) / self.dataset.std_for_eval  # according to T2M norms
+            motion = renormed_motion
+            # This step is needed because T2M evaluators expect their norm convention
+
+        pos_one_hots = []
+        word_embeddings = []
+        for token in tokens:
+            word_emb, pos_oh = self.w_vectorizer[token]
+            pos_one_hots.append(pos_oh[None, :])
+            word_embeddings.append(word_emb[None, :])
+        pos_one_hots = np.concatenate(pos_one_hots, axis=0)
+        word_embeddings = np.concatenate(word_embeddings, axis=0)
+
+        return word_embeddings, pos_one_hots, caption, sent_len, motion, m_length, '_'.join(tokens)
+
+
+class CompCCDGeneratedDataset(Dataset):
+
+    def __init__(self, args, model, diffusion, dataloader, mm_num_samples, mm_num_repeats, num_samples_limit, scale=1.):
+        self.dataloader = dataloader
+        self.dataset = dataloader.dataset
+        assert mm_num_samples < len(dataloader.dataset)
+        use_ddim = False  # FIXME - hardcoded
+        clip_denoised = False  # FIXME - hardcoded
+        # self.max_motion_length = max_motion_length
+        sample_fn = (
+            diffusion.p_sample_loop_inpainting if not use_ddim else diffusion.ddim_sample_loop
+        )
+
+        real_num_batches = len(dataloader)
+        if num_samples_limit is not None:
+            real_num_batches = num_samples_limit // dataloader.batch_size + 1
+        print('real_num_batches', real_num_batches)
+
+        generated_motion = []
+        mm_generated_motions = []
+        if mm_num_samples > 0:
+            mm_idxs = np.random.choice(real_num_batches, mm_num_samples // dataloader.batch_size +1, replace=False)
+            mm_idxs = np.sort(mm_idxs)
+        else:
+            mm_idxs = []
+        print('mm_idxs', mm_idxs)
+
+        model.eval()
+
+
+        with torch.no_grad():
+            for i, batch in tqdm(enumerate(dataloader)):
+
+                if num_samples_limit is not None and len(generated_motion) >= num_samples_limit:
+                    break
+                bs = len(batch['length_0'])
+
+                model_kwargs_0 = {}
+                model_kwargs_0['y'] = {}
+                model_kwargs_0['y']['length'] = batch['length_0']
+                model_kwargs_0['y']['text'] = batch['text_0']
+                model_kwargs_0['y']['mask'] = lengths_to_mask(model_kwargs_0['y']['length'], 
+                                    dist_util.dev()).unsqueeze(1).unsqueeze(2)
+
+                model_kwargs_1 = {}
+                model_kwargs_1['y'] = {}
+                model_kwargs_1['y']['length'] = [args.inpainting_frames + len 
+                                                for len in batch['length_1_with_transition']]
+                model_kwargs_0['y']['text'] = batch['text_1']
+                model_kwargs_1['y']['mask'] = lengths_to_mask(model_kwargs_1['y']['length'], 
+                                    dist_util.dev()).unsqueeze(1).unsqueeze(2)
+                # add CFG scale to batch
+                if scale != 1.:
+                    model_kwargs_0['y']['scale'] = torch.ones(len(model_kwargs_0['y']['length']),
+                                                            device=dist_util.dev()) * scale
+                    model_kwargs_1['y']['scale'] = torch.ones(len(model_kwargs_1['y']['length']),
+                                                            device=dist_util.dev()) * scale
+
+                mm_num_now = len(mm_generated_motions) // dataloader.batch_size
+                is_mm = i in mm_idxs
+                repeat_times = mm_num_repeats if is_mm else 1
+                mm_motions = []
+
+                for t in range(repeat_times):
+                    sample_0, sample_1 = sample_fn(
+                        model,
+                        args.inpainting_frames,
+                        (bs, 135, 1, model_kwargs_0['y']['mask'].shape[-1]),
+                        (bs, 135, 1, model_kwargs_1['y']['mask'].shape[-1]),
+                        clip_denoised=clip_denoised,
+                        model_kwargs_0=model_kwargs_0,
+                        model_kwargs_1=model_kwargs_1,
+                        skip_timesteps=0,  # 0 is the default value - i.e. don't skip any step
+                        init_image=None,
+                        progress=True,
+                        dump_steps=None,
+                        noise=None,
+                        const_noise=False,
+                        # when experimenting guidance_scale we want to nutrileze the effect of noise on generation
+                    )
+                    sample_1 = sample_1[:,:,:,args.inpainting_frames:]
+                    sample_0 = sample_0.squeeze().permute(1,2).cpu().numpy() # B L D
+                    sample_1 = sample_1.squeeze().permute(1,2).cpu().numpy()
+                    length_0 = batch['length_0']
+                    length_1 = batch['length_1_with_transition']
+                    length = [length_0[idx] + length_1[idx] for idx in range(bs)]
+                    def collate_tensor_with_padding(batch):
+                        dims = batch[0].dim()
+                        max_size = [max([b.size(i) for b in batch]) for i in range(dims)]
+                        size = (len(batch),) + tuple(max_size)
+                        canvas = batch[0].new_zeros(size=size)
+                        for i, b in enumerate(batch):
+                            sub_tensor = canvas[i]
+                            for d in range(dims):
+                                sub_tensor = sub_tensor.narrow(d, 0, b.size(d))
+                            sub_tensor.add_(b)
+                        return canvas
+                    def merge(motion_0, length_0, motion_1, length_1): # B L D
+                        bs = motion_0.shape[0]
+                        ret = []
+                        for idx in range(bs):
+                             ret[idx] = np.concatenate(motion_0[idx,:length_0[idx]], motion_1[idx,:length_1[idx]], axis=1)
+                        
+                        return collate_tensor_with_padding(ret)
+
+                    sample = merge(sample_0, length_0, sample_1, length_1)
+                    if t == 0:
+                        sub_dicts = [{'motion': sample[bs_i],
+                                    'length': length[bs_i],
+                                    # 'caption': model_kwargs['y']['text'][bs_i],
+                                    # 'tokens': tokens[bs_i],
+                                    # 'cap_len': len(tokens[bs_i]),
+                                    } for bs_i in range(dataloader.batch_size)]
+                        generated_motion += sub_dicts
+                    # if t == 0:
+                    #     sub_dicts = [{'motion': sample[bs_i].squeeze().permute(1,0).cpu().numpy(),
+                    #                 'length': model_kwargs['y']['lengths'][bs_i].cpu().numpy(),
+                    #                 'caption': model_kwargs['y']['text'][bs_i],
+                    #                 # 'tokens': tokens[bs_i],
+                    #                 # 'cap_len': len(tokens[bs_i]),
+                    #                 } for bs_i in range(dataloader.batch_size)]
+                    #     generated_motion += sub_dicts
+
+                    if is_mm:
+                        mm_motions += [{'motion': sample[bs_i].squeeze().permute(1, 0).cpu().numpy(),
+                                        'length': model_kwargs['y']['lengths'][bs_i].cpu().numpy(),
+                                        } for bs_i in range(dataloader.batch_size)]
+
+                if is_mm:
+                    mm_generated_motions += [{
+                                    'caption': model_kwargs['y']['text'][bs_i],
+                                    'tokens': tokens[bs_i],
+                                    'cap_len': len(tokens[bs_i]),
+                                    'mm_motions': mm_motions[bs_i::dataloader.batch_size],  # collect all 10 repeats from the (32*10) generated motions
+                                    } for bs_i in range(dataloader.batch_size)]
+
+
+        self.generated_motion = generated_motion
+        self.mm_generated_motion = mm_generated_motions
+        # self.w_vectorizer = dataloader.dataset.w_vectorizer
 
 
     def __len__(self):

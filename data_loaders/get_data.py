@@ -3,6 +3,7 @@ from data_loaders.tensors import collate as all_collate
 from data_loaders.tensors import t2m_collate
 from teach.data.tools.collate import collate_pairs_and_text, collate_datastruct_and_text
 from tqdm import tqdm 
+from teach.data.sampling.base import FrameSampler
 
 def get_dataset_class(name):
     if name == "amass":
@@ -69,7 +70,10 @@ def get_dataset_loader(args, name, batch_size, num_frames, split='train', hml_mo
             normalization=True)
         transforms = SMPLTransform(rots2rfeats=globalvelandy, rots2joints=smplh,
             joints2jfeats=rifke)
-        dataset = BABEL(datapath=datapath, framerate=framerate, dtype=dtype, transforms=transforms, tiny=args.tiny)
+        frame_sampler = FrameSampler()
+        frame_sampler.max_len = 90
+        dataset = BABEL(datapath=datapath, framerate=framerate, dtype=dtype, 
+            sampler=frame_sampler, split=split, transforms=transforms, tiny=args.tiny)
         datatype = 'separate_pairs'
         if datatype == 'separate_pairs':
             collate = collate_pairs_and_text

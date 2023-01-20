@@ -58,7 +58,7 @@ def main():
     transforms = dataset.transforms
     # transforms.rots2joints.jointstype = 'mmmns'
 
-    texts = ['climb down ladder', 'steps left']
+    texts = ['hold a golf club while look at the ground', 'swing golf club']
     texts_list = (['walk in circle', 'sit down'],
                 ['throw', 'catch'],
                 ['climb down ladder', 'steps left'],
@@ -77,7 +77,7 @@ def main():
     # for text in texts_list:
 
     file_name = texts[0] + '_' + texts[1]
-    lengths = [180, 180]
+    lengths = [45, 90]
     slerp_ws = 8
     return_type="smpl"
     motion = forward_seq(args, 
@@ -99,7 +99,7 @@ def main():
             ) 
     motion = motion['vertices'].numpy()
     vid_ = visualize_meshes(motion)
-    save_video_samples(vid_, f'../mdm/results/{file_name}.mp4', texts, fps=30)
+    save_video_samples(vid_, f'video/{file_name}.mp4', texts, fps=30)
     # keyids = dataset.keyids
     # ommited = 0
     # with torch.no_grad():
@@ -171,18 +171,18 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
 
     model_kwargs_1 = {}
     model_kwargs_1['y'] = {}
-    model_kwargs_1['y']['length'] = [lengths[1] - slerp_window_size] 
+    model_kwargs_1['y']['length'] = [lengths[1] - slerp_window_size + 4] 
     model_kwargs_1['y']['text'] = [texts[1]]
     model_kwargs_1['y']['mask'] = lengths_to_mask([lengths[1] - slerp_window_size], dist_util.dev()).unsqueeze(1).unsqueeze(2)
     model_kwargs_1['y']['scale'] = torch.ones(args.batch_size, device=dist_util.dev()) * args.guidance_param
 
-    sample_fn = diffusion.p_sample_loop_multi
+    sample_fn = diffusion.p_sample_loop_inpainting
 
 
 
     sample_0, sample_1 = sample_fn(
             model,
-            args.hist_frames,
+            4,
             (args.batch_size, model.njoints, model.nfeats, lengths[0]),
             (args.batch_size, model.njoints, model.nfeats, lengths[1] - slerp_window_size),
             clip_denoised=False,
@@ -195,11 +195,13 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
             noise=None,
             const_noise=False,
         )
-    
+    print(sample_1.shape)
+    sample_1 = sample_1[:,:,:,4:]
+    print(sample_1.shape)
     sample_0 = sample_0.squeeze().permute(1, 0).cpu()
     sample_1 = sample_1.squeeze().permute(1, 0).cpu()
-    toslerp_inter = torch.tile(0*sample_1[0], (slerp_window_size, 1))
-    sample_1 = torch.cat((toslerp_inter, sample_1))
+    # toslerp_inter = torch.tile(0*sample_1[0], (slerp_window_size, 1))
+    # sample_1 = torch.cat((toslerp_inter, sample_1))
     all_features = torch.cat((sample_0, sample_1), dim=0)
 
     Datastruct = transforms.Datastruct
@@ -212,43 +214,43 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
     from teach.tools.interpolation import aligining_bodies, slerp_poses, slerp_translation, align_trajectory
 
     # Rotate bodies etc in place
-    end_first_motion = lengths[0] - 1
-    for length in lengths[1:]:
-        # Compute indices
-        begin_second_motion = end_first_motion + 1
-        begin_second_motion += slerp_window_size if do_slerp else 0
-        # last motion + 1 / to be used with slice
-        last_second_motion_ex = end_first_motion + 1 + length
+    # end_first_motion = lengths[0] - 1
+    # for length in lengths[1:]:
+    #     # Compute indices
+    #     begin_second_motion = end_first_motion + 1
+    #     begin_second_motion += slerp_window_size if do_slerp else 0
+    #     # last motion + 1 / to be used with slice
+    #     last_second_motion_ex = end_first_motion + 1 + length
 
-        if align_full_bodies:
-            outputs = aligining_bodies(last_pose=rots[end_first_motion],
-                                        last_trans=transl[end_first_motion],
-                                        poses=rots[begin_second_motion:last_second_motion_ex],
-                                        transl=transl[begin_second_motion:last_second_motion_ex],
-                                        pose_rep=pose_rep)
-            # Alignement
-            rots[begin_second_motion:last_second_motion_ex] = outputs[0]
-            transl[begin_second_motion:last_second_motion_ex] = outputs[1]
-        elif align_only_trans:
-            transl[begin_second_motion:last_second_motion_ex] = align_trajectory(transl[end_first_motion],
-                                                                                    transl[begin_second_motion:last_second_motion_ex])
-        else:
-            pass
+    #     if align_full_bodies:
+    #         outputs = aligining_bodies(last_pose=rots[end_first_motion],
+    #                                     last_trans=transl[end_first_motion],
+    #                                     poses=rots[begin_second_motion:last_second_motion_ex],
+    #                                     transl=transl[begin_second_motion:last_second_motion_ex],
+    #                                     pose_rep=pose_rep)
+    #         # Alignement
+    #         rots[begin_second_motion:last_second_motion_ex] = outputs[0]
+    #         transl[begin_second_motion:last_second_motion_ex] = outputs[1]
+    #     elif align_only_trans:
+    #         transl[begin_second_motion:last_second_motion_ex] = align_trajectory(transl[end_first_motion],
+    #                                                                                 transl[begin_second_motion:last_second_motion_ex])
+    #     else:
+    #         pass
 
-        # Slerp if needed
-        if do_slerp:
-            inter_pose = slerp_poses(last_pose=rots[end_first_motion],
-                                        new_pose=rots[begin_second_motion],
-                                        number_of_frames=slerp_window_size, pose_rep=pose_rep)
+    #     # Slerp if needed
+    #     if do_slerp:
+    #         inter_pose = slerp_poses(last_pose=rots[end_first_motion],
+    #                                     new_pose=rots[begin_second_motion],
+    #                                     number_of_frames=slerp_window_size, pose_rep=pose_rep)
 
-            inter_transl = slerp_translation(transl[end_first_motion], transl[begin_second_motion], number_of_frames=slerp_window_size)
+    #         inter_transl = slerp_translation(transl[end_first_motion], transl[begin_second_motion], number_of_frames=slerp_window_size)
 
-            # Fill the gap
-            rots[end_first_motion+1:begin_second_motion] = inter_pose
-            transl[end_first_motion+1:begin_second_motion] = inter_transl
+    #         # Fill the gap
+    #         rots[end_first_motion+1:begin_second_motion] = inter_pose
+    #         transl[end_first_motion+1:begin_second_motion] = inter_transl
 
         # Update end_first_motion
-        end_first_motion += length
+        # end_first_motion += length
     from teach.transforms.smpl import RotTransDatastruct
     final_datastruct = Datastruct(rots_=RotTransDatastruct(rots=rots, trans=transl))
 
