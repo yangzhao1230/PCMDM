@@ -311,7 +311,7 @@ class CompCCDGeneratedDataset(Dataset):
                 model_kwargs_1['y'] = {}
                 model_kwargs_1['y']['length'] = [args.inpainting_frames + len 
                                                 for len in batch['length_1_with_transition']]
-                model_kwargs_0['y']['text'] = batch['text_1']
+                model_kwargs_1['y']['text'] = batch['text_1']
                 model_kwargs_1['y']['mask'] = lengths_to_mask(model_kwargs_1['y']['length'], 
                                     dist_util.dev()).unsqueeze(1).unsqueeze(2)
                 # add CFG scale to batch
