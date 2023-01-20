@@ -801,7 +801,7 @@ class GaussianDiffusion:
         
         model_kwargs_1['y']['hist_motion'] = final_0['sample'][:,:,:,-hist_frames:]
         # model_kwargs_1['y']['hist_motion'] = [len + ]
-        shape_1 = (shape_1[0], shape_1[1], shape_1[2], shape_1[3] +  hist_frames)
+        # shape_1 = (shape_1[0], shape_1[1], shape_1[2], shape_1[3] +  hist_frames)
         
         for i, sample in enumerate(self.p_sample_loop_progressive(
             model,
