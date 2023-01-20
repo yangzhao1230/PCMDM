@@ -137,3 +137,5 @@ dmypy.json
 /generate_mp4.py
 
 /all_checkpoints
+
+/video
