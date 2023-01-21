@@ -7,7 +7,7 @@ from torch.utils.data._utils.collate import default_collate
 
 
 def collate_fn(batch):
-    batch.sort(key=lambda x: x[3], reverse=True)
+    # batch.sort(key=lambda x: x[3], reverse=True)
     return default_collate(batch)
 
 

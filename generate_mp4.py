@@ -58,7 +58,7 @@ def main():
     transforms = dataset.transforms
     # transforms.rots2joints.jointstype = 'mmmns'
 
-    texts = ['hold a golf club while look at the ground', 'swing golf club']
+    texts = ['climb down ladder', 'steps left']
     texts_list = (['walk in circle', 'sit down'],
                 ['throw', 'catch'],
                 ['climb down ladder', 'steps left'],
@@ -78,7 +78,7 @@ def main():
 
     file_name = texts[0] + '_' + texts[1]
     lengths = [45, 90]
-    slerp_ws = 8
+    slerp_ws = 0
     return_type="smpl"
     motion = forward_seq(args, 
                             model=model,
@@ -162,6 +162,7 @@ def main():
 
 def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_bodies=True, align_only_trans=False,
                     slerp_window_size=None, return_type="joints", do_slerp='True'):
+    slerp_window_size = 0
     model_kwargs_0 = {}
     model_kwargs_0['y'] = {}
     model_kwargs_0['y']['length'] = [lengths[0]] 
@@ -173,7 +174,7 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
     model_kwargs_1['y'] = {}
     model_kwargs_1['y']['length'] = [lengths[1] - slerp_window_size + 4] 
     model_kwargs_1['y']['text'] = [texts[1]]
-    model_kwargs_1['y']['mask'] = lengths_to_mask([lengths[1] - slerp_window_size], dist_util.dev()).unsqueeze(1).unsqueeze(2)
+    model_kwargs_1['y']['mask'] = lengths_to_mask([lengths[1] + 4 - slerp_window_size], dist_util.dev()).unsqueeze(1).unsqueeze(2)
     model_kwargs_1['y']['scale'] = torch.ones(args.batch_size, device=dist_util.dev()) * args.guidance_param
 
     sample_fn = diffusion.p_sample_loop_inpainting
@@ -184,7 +185,7 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
             model,
             4,
             (args.batch_size, model.njoints, model.nfeats, lengths[0]),
-            (args.batch_size, model.njoints, model.nfeats, lengths[1] - slerp_window_size),
+            (args.batch_size, model.njoints, model.nfeats, lengths[1] + 4 - slerp_window_size),
             clip_denoised=False,
             model_kwargs_0=model_kwargs_0,
             model_kwargs_1=model_kwargs_1,

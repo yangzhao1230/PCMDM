@@ -344,12 +344,13 @@ class CompCCDGeneratedDataset(Dataset):
                         # when experimenting guidance_scale we want to nutrileze the effect of noise on generation
                     )
                     sample_1 = sample_1[:,:,:,args.inpainting_frames:]
-                    sample_0 = sample_0.squeeze().permute(1,2).cpu().numpy() # B L D
-                    sample_1 = sample_1.squeeze().permute(1,2).cpu().numpy()
+                    sample_0 = sample_0.squeeze().permute(0, 2, 1).cpu().numpy() # B L D
+                    sample_1 = sample_1.squeeze().permute(0, 2, 1).cpu().numpy()
                     length_0 = batch['length_0']
                     length_1 = batch['length_1_with_transition']
                     length = [length_0[idx] + length_1[idx] for idx in range(bs)]
                     def collate_tensor_with_padding(batch):
+                        batch = [torch.tensor(x) for x in batch]
                         dims = batch[0].dim()
                         max_size = [max([b.size(i) for b in batch]) for i in range(dims)]
                         size = (len(batch),) + tuple(max_size)
@@ -359,12 +360,15 @@ class CompCCDGeneratedDataset(Dataset):
                             for d in range(dims):
                                 sub_tensor = sub_tensor.narrow(d, 0, b.size(d))
                             sub_tensor.add_(b)
+                        canvas = canvas.detach().numpy()
+                        # canvas = [x.detach().numpy() for x in canvas]
                         return canvas
+
                     def merge(motion_0, length_0, motion_1, length_1): # B L D
                         bs = motion_0.shape[0]
                         ret = []
                         for idx in range(bs):
-                             ret[idx] = np.concatenate(motion_0[idx,:length_0[idx]], motion_1[idx,:length_1[idx]], axis=1)
+                             ret.append(np.concatenate((motion_0[idx,:length_0[idx]], motion_1[idx,:length_1[idx]]), axis=0))
                         
                         return collate_tensor_with_padding(ret)
 
@@ -372,6 +376,7 @@ class CompCCDGeneratedDataset(Dataset):
                     if t == 0:
                         sub_dicts = [{'motion': sample[bs_i],
                                     'length': length[bs_i],
+                                    'text': model_kwargs_0['y']['text'][bs_i] + ', ' +  model_kwargs_1['y']['text'][bs_i]
                                     # 'caption': model_kwargs['y']['text'][bs_i],
                                     # 'tokens': tokens[bs_i],
                                     # 'cap_len': len(tokens[bs_i]),
@@ -411,23 +416,23 @@ class CompCCDGeneratedDataset(Dataset):
 
     def __getitem__(self, item):
         data = self.generated_motion[item]
-        motion, m_length, caption, tokens = data['motion'], data['length'], data['caption'], data['tokens']
-        sent_len = data['cap_len']
+        motion, length, text= data['motion'], data['length'], data['text']
+        # sent_len = data['cap_len']
 
-        if self.dataset.mode == 'eval':
-            normed_motion = motion
-            denormed_motion = self.dataset.t2m_dataset.inv_transform(normed_motion)
-            renormed_motion = (denormed_motion - self.dataset.mean_for_eval) / self.dataset.std_for_eval  # according to T2M norms
-            motion = renormed_motion
-            # This step is needed because T2M evaluators expect their norm convention
+        # if self.dataset.mode == 'eval':
+        #     normed_motion = motion
+        #     denormed_motion = self.dataset.t2m_dataset.inv_transform(normed_motion)
+        #     renormed_motion = (denormed_motion - self.dataset.mean_for_eval) / self.dataset.std_for_eval  # according to T2M norms
+        #     motion = renormed_motion
+        #     # This step is needed because T2M evaluators expect their norm convention
 
-        pos_one_hots = []
-        word_embeddings = []
-        for token in tokens:
-            word_emb, pos_oh = self.w_vectorizer[token]
-            pos_one_hots.append(pos_oh[None, :])
-            word_embeddings.append(word_emb[None, :])
-        pos_one_hots = np.concatenate(pos_one_hots, axis=0)
-        word_embeddings = np.concatenate(word_embeddings, axis=0)
-
-        return word_embeddings, pos_one_hots, caption, sent_len, motion, m_length, '_'.join(tokens)
+        # pos_one_hots = []
+        # word_embeddings = []
+        # for token in tokens:
+        #     word_emb, pos_oh = self.w_vectorizer[token]
+        #     pos_one_hots.append(pos_oh[None, :])
+        #     word_embeddings.append(word_emb[None, :])
+        # pos_one_hots = np.concatenate(pos_one_hots, axis=0)
+        # word_embeddings = np.concatenate(word_embeddings, axis=0)
+        return motion, length, text
+        # return word_embeddings, pos_one_hots, caption, sent_len, motion, m_length, '_'.join(tokens)

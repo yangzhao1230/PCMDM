@@ -30,13 +30,14 @@ def evaluate_matching_score(eval_wrapper, motion_loaders, file):
         # print(motion_loader_name)
         with torch.no_grad():
             for idx, batch in enumerate(motion_loader):
-                word_embeddings, pos_one_hots, _, sent_lens, motions, m_lens, _ = batch
+                if motion_loader_name != 'vald':
+                    motion, length, text = batch["motion_feats"], batch["length"], batch["text"]
+                else:
+                    motion, length, text = batch
                 text_embeddings, motion_embeddings = eval_wrapper.get_co_embeddings(
-                    word_embs=word_embeddings,
-                    pos_ohot=pos_one_hots,
-                    cap_lens=sent_lens,
-                    motions=motions,
-                    m_lens=m_lens
+                    motion, 
+                    length,
+                    text
                 )
                 dist_mat = euclidean_distance_matrix(text_embeddings.cpu().numpy(),
                                                      motion_embeddings.cpu().numpy())
@@ -75,10 +76,11 @@ def evaluate_fid(eval_wrapper, groundtruth_loader, activation_dict, file):
     print('========== Evaluating FID ==========')
     with torch.no_grad():
         for idx, batch in enumerate(groundtruth_loader):
-            _, _, _, sent_lens, motions, m_lens, _ = batch
+            # motion, length, text = batch
+            motion, length, text = batch["motion_feats"], batch["length"], batch["text"]
             motion_embeddings = eval_wrapper.get_motion_embeddings(
-                motions=motions,
-                m_lens=m_lens
+                motion,
+                length
             )
             gt_motion_embeddings.append(motion_embeddings.cpu().numpy())
     gt_motion_embeddings = np.concatenate(gt_motion_embeddings, axis=0)
@@ -242,13 +244,13 @@ if __name__ == '__main__':
 
     print(f'Eval mode [{args.eval_mode}]')
     if args.eval_mode == 'debug':
-        num_samples_limit = 1000  # None means no limit (eval over all dataset)
+        num_samples_limit = 32  # None means no limit (eval over all dataset)
         run_mm = False
         mm_num_samples = 0
         mm_num_repeats = 0
         mm_num_times = 0
         diversity_times = 300
-        replication_times = 5  # about 3 Hrs
+        replication_times = 1  # about 3 Hrs
     elif args.eval_mode == 'wo_mm':
         num_samples_limit = 1000
         run_mm = False
@@ -274,6 +276,7 @@ if __name__ == '__main__':
 
     logger.log("creating data loader...")
     split = 'val'
+    origin_loader = get_dataset_loader(args, name=args.dataset, batch_size=args.batch_size, num_frames=None, split=split)
     gt_loader = get_dataset_loader(args, name=args.dataset, batch_size=args.batch_size, num_frames=None, split=split, hml_mode='gt')
     # gen_loader = get_dataset_loader(name=args.dataset, batch_size=args.batch_size, num_frames=None, split=split, hml_mode='eval')
     # num_actions = gen_loader.dataset.num_actions
@@ -297,7 +300,7 @@ if __name__ == '__main__':
         ################
         'vald': lambda: get_mdm_loader(
             args, model, diffusion, args.batch_size,
-            gt_loader, mm_num_samples, mm_num_repeats, num_samples_limit, args.guidance_param
+            origin_loader, mm_num_samples, mm_num_repeats, num_samples_limit, args.guidance_param
         )
     }
 

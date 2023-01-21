@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from data_loaders.tensors import collate as all_collate
 from data_loaders.tensors import t2m_collate
-from teach.data.tools.collate import collate_pairs_and_text, collate_datastruct_and_text
+from teach.data.tools.collate import collate_pairs_and_text, collate_datastruct_and_text, collate_contrastive
 from tqdm import tqdm 
 from teach.data.sampling.base import FrameSampler
 
@@ -75,10 +75,10 @@ def get_dataset_loader(args, name, batch_size, num_frames, split='train', hml_mo
         dataset = BABEL(datapath=datapath, framerate=framerate, dtype=dtype, 
             sampler=frame_sampler, split=split, transforms=transforms, tiny=args.tiny)
         datatype = 'separate_pairs'
-        if datatype == 'separate_pairs':
+        if hml_mode == 'train':
             collate = collate_pairs_and_text
         else:
-            collate = collate_datastruct_and_text
+            collate = collate_contrastive
 
     # collate = get_collate_fn(name, hml_mode)
 

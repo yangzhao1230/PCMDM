@@ -203,7 +203,7 @@ class EvaluatorCCDWrapper(object):
             'dim_pose': 263 if dataset_name == 'humanml' else 251,
             'dim_movement_enc_hidden': 512,
             'dim_movement_latent': 512,
-            'checkpoints_dir': '/home/zhao_yang/project/temp/TEACH/all_checkpoints/MotipnClip.ckpt',
+            'checkpoints_dir': 'all_checkpoints/MotipnClip.ckpt',
             'unit_length': 4,
         }
         self.model = MotionClip.load_from_checkpoint(opt["checkpoints_dir"])
@@ -225,7 +225,7 @@ class EvaluatorCCDWrapper(object):
             # word_embs = word_embs.detach().to(self.device).float()
             # pos_ohot = pos_ohot.detach().to(self.device).float()
             motions = motions.detach().to(self.device).float()
-            lengths = lengths.detach().to(self.device).float()
+            # lengths = lengths.detach().to(self.device).float()
             '''Motions Encoding'''
             # align_idx = np.argsort(m_lens.data.tolist())[::-1].copy()
             # motions = motions[align_idx]
@@ -236,16 +236,16 @@ class EvaluatorCCDWrapper(object):
             # movements = self.movement_encoder(motions[..., :-4]).detach()
             # m_lens = m_lens // self.opt['unit_length']
             # motion_embedding = self.motion_encoder(movements, m_lens)
-            text_rep = self.text_encoder(texts)
-            text_rep = self.text_proj_head(text_rep)
+            text_rep = self.model.text_encoder(texts)
+            text_rep = self.model.text_proj_head(text_rep)
 
-        return motion_rep, text_rep
+        return text_rep, motion_rep
 
     # Please note that the results does not following the order of inputs
     def get_motion_embeddings(self, motions, lengths):
         with torch.no_grad():
             motions = motions.detach().to(self.device).float()
-            lengths = lengths.detach().to(self.device).float()
+            # lengths = lengths.detach().to(self.device).float()
 
             motion_rep = self.model.motion_encoder(motions, lengths)
             motion_rep = self.model.motion_proj_head(motion_rep)
