@@ -6,6 +6,7 @@ from os.path import join as pjoin
 from tqdm import tqdm
 from utils import dist_util
 from teach.data.tools import lengths_to_mask 
+import numpy as np
 
 def build_models(opt):
     if opt.text_enc_mod == 'bigru':
@@ -409,6 +410,79 @@ class CompCCDGeneratedDataset(Dataset):
         self.mm_generated_motion = mm_generated_motions
         # self.w_vectorizer = dataloader.dataset.w_vectorizer
 
+
+    def __len__(self):
+        return len(self.generated_motion)
+
+
+    def __getitem__(self, item):
+        data = self.generated_motion[item]
+        motion, length, text= data['motion'], data['length'], data['text']
+        # sent_len = data['cap_len']
+
+        # if self.dataset.mode == 'eval':
+        #     normed_motion = motion
+        #     denormed_motion = self.dataset.t2m_dataset.inv_transform(normed_motion)
+        #     renormed_motion = (denormed_motion - self.dataset.mean_for_eval) / self.dataset.std_for_eval  # according to T2M norms
+        #     motion = renormed_motion
+        #     # This step is needed because T2M evaluators expect their norm convention
+
+        # pos_one_hots = []
+        # word_embeddings = []
+        # for token in tokens:
+        #     word_emb, pos_oh = self.w_vectorizer[token]
+        #     pos_one_hots.append(pos_oh[None, :])
+        #     word_embeddings.append(word_emb[None, :])
+        # pos_one_hots = np.concatenate(pos_one_hots, axis=0)
+        # word_embeddings = np.concatenate(word_embeddings, axis=0)
+        return motion, length, text
+        # return word_embeddings, pos_one_hots, caption, sent_len, motion, m_length, '_'.join(tokens)
+
+class CompTEACHGeneratedDataset(Dataset):
+
+    def __init__(self, args, cnt):
+        batch_size = 32
+        print(f"loading generated_{cnt}.npy")
+        self.generated_motion = []
+        self.data = np.load(f"/home/zhao_yang/project/teach/data/generated_{cnt}.npy", allow_pickle=True)
+        def collate_tensor_with_padding(batch):
+            batch = [torch.tensor(x) for x in batch]
+            dims = batch[0].dim()
+            max_size = [max([b.size(i) for b in batch]) for i in range(dims)]
+            size = (len(batch),) + tuple(max_size)
+            canvas = batch[0].new_zeros(size=size)
+            for i, b in enumerate(batch):
+                sub_tensor = canvas[i]
+                for d in range(dims):
+                    sub_tensor = sub_tensor.narrow(d, 0, b.size(d))
+                sub_tensor.add_(b)
+            canvas = canvas.detach().numpy()
+            # canvas = [x.detach().numpy() for x in canvas]
+            return canvas
+        # self.w_vectorizer = dataloader.dataset.w_vectorizer
+        i = 0
+        while i < 1024:
+            motion_lst = []
+            len_lst = []
+            text_lst = []
+            for j in range(i, i + 32):
+                motion_lst.append(self.data[j]["motion"])
+                len_lst.append(self.data[j]["length"])
+                text_lst.append(self.data[j]["text"])
+
+            motion_arr = collate_tensor_with_padding(motion_lst)
+            sub_dicts = [{'motion': motion_arr[bs_i],
+                'length': len_lst[bs_i],
+                'text': text_lst[bs_i]
+                # 'caption': model_kwargs['y']['text'][bs_i],
+                # 'tokens': tokens[bs_i],
+                # 'cap_len': len(tokens[bs_i]),
+                } for bs_i in range(batch_size)]
+            
+            self.generated_motion += sub_dicts
+            i += 32
+
+        self.mm_generated_motion = mm_generated_motions = []
 
     def __len__(self):
         return len(self.generated_motion)

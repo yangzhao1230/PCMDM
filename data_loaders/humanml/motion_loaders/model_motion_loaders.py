@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader, Dataset
 from data_loaders.humanml.utils.get_opt import get_opt
-from data_loaders.humanml.motion_loaders.comp_v6_model_dataset import CompMDMGeneratedDataset, CompCCDGeneratedDataset
+from data_loaders.humanml.motion_loaders.comp_v6_model_dataset import CompMDMGeneratedDataset, CompCCDGeneratedDataset, CompTEACHGeneratedDataset
 from data_loaders.humanml.utils.word_vectorizer import WordVectorizer
 import numpy as np
 from torch.utils.data._utils.collate import default_collate
@@ -72,15 +72,19 @@ def get_motion_loader(opt_path, batch_size, ground_truth_dataset, mm_num_samples
     return motion_loader, mm_motion_loader
 
 # our loader
+cnt = 0
+
 def get_mdm_loader(args, model, diffusion, batch_size, ground_truth_loader, mm_num_samples, mm_num_repeats, num_samples_limit, scale):
     opt = {
         'name': 'test',  # FIXME
     }
     print('Generating %s ...' % opt['name'])
+    global cnt
     # dataset = CompMDMGeneratedDataset(opt, ground_truth_dataset, ground_truth_dataset.w_vectorizer, mm_num_samples, mm_num_repeats)
-    dataset = CompCCDGeneratedDataset(args, model, diffusion, ground_truth_loader, mm_num_samples, mm_num_repeats, num_samples_limit, scale)
-
+    dataset = CompTEACHGeneratedDataset(args, cnt)
     mm_dataset = MMGeneratedDataset(opt, dataset, None)
+    
+    cnt += 1
 
     # NOTE: bs must not be changed! this will cause a bug in R precision calc!
     motion_loader = DataLoader(dataset, batch_size=batch_size, collate_fn=collate_fn, drop_last=True, num_workers=4)
