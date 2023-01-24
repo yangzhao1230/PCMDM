@@ -24,6 +24,15 @@ from teach.data.tools import lengths_to_mask
 from teach.render.mesh_viz import visualize_meshes
 from teach.render.video import save_video_samples
 import sys
+
+def generate_mask(shape, prob):
+    mask = torch.bernoulli(torch.ones(shape) * prob)
+    mask = torch.tensor(mask, dtype=torch.bool)
+    return mask
+    #print(mask)    
+
+# generate_mask((1,10,1,10), 0.1)
+
 def main():
     # dist_util.dev() = 'cpu'
     args = generate_args()
@@ -58,7 +67,7 @@ def main():
     transforms = dataset.transforms
     # transforms.rots2joints.jointstype = 'mmmns'
 
-    texts = ['climb down ladder', 'steps left']
+    texts = ['sit cross legs', 'stand']
     texts_list = (['walk in circle', 'sit down'],
                 ['throw', 'catch'],
                 ['climb down ladder', 'steps left'],
@@ -77,7 +86,7 @@ def main():
     # for text in texts_list:
 
     file_name = texts[0] + '_' + texts[1]
-    lengths = [45, 90]
+    lengths = [45, 45]
     slerp_ws = 0
     return_type="smpl"
     motion = forward_seq(args, 
@@ -99,65 +108,7 @@ def main():
             ) 
     motion = motion['vertices'].numpy()
     vid_ = visualize_meshes(motion)
-    save_video_samples(vid_, f'video/{file_name}.mp4', texts, fps=30)
-    # keyids = dataset.keyids
-    # ommited = 0
-    # with torch.no_grad():
-    #     for keyid in (pbar := tqdm(keyids)):
-    #         pbar.set_description(f"Processing {keyid}")
-            
-    #         one_data = dataset.load_keyid(keyid, mode='inference')
-    #         # buggy gt
-    #         if one_data['length_0'] == 1 or one_data['length_1'] == 1 :
-    #             print(f'Omitted {keyid}')
-    #             ommited += 1
-    #             continue
-            
-
-    #         batch = collate_pairs_and_text([one_data])
-    #         cur_lens = [batch['length_0'][0], batch['length_1'][0] + batch['length_transition'][0]]
-    #         cur_texts = [batch['text_0'][0], batch['text_1'][0]]
-
-    #         # batch_size = 1 for reproductability
-    #         for index in range(1):
-    #             # fix the seed
-    #             # pl.seed_everything(index)
-    #             fixseed(index)
-    #             from teach.transforms.smpl import RotTransDatastruct
-                
-    #             slerp_ws = 8
-
-    #             texts = ['sit down', 'walk']
-    #             lengths = [180, 90]
-    #             motion = forward_seq(args, 
-    #                                 model=model,
-    #                                 diffusion=diffusion,
-    #                                 transforms=transforms,
-    #                                 texts=cur_texts, 
-    #                                 lengths=cur_lens,
-    #                                     align_full_bodies=align_full_bodies,
-    #                                     align_only_trans=align_trans,
-    #                                     slerp_window_size=slerp_ws,
-    #                                 return_type = 'smpl')
-    #             np.save(f'results/results.npy',
-    #                     {'vertices': motion['vertices'].numpy(),
-    #                      'rots': motion['rots'].numpy(),
-    #                      'transl': motion['transl'].numpy(),
-    #                      'text': texts,
-    #                      'lengths': lengths} 
-    #                     )
-    #             motion = motion['vertices'].numpy()
-    #             # only visuals in this branch
-    #             # if cfg.jointstype == "vertices": # defaults
-    #             # path
-    #             np.save('save/motion_1.npy', motion) 
-    #             sys.exit(0)
-    #             # vid_ = visualize_meshes(motion)
-    #             # save_video_samples(vid_, 'results.mp4', texts, fps=30)
-
-
-    # print("All the sampling are done")
-    # print(f"All the sampling are done. You can find them here:\n{path}")
+    save_video_samples(vid_, f'video/{file_name_without_mix}.mp4', texts, fps=30)
 
 
 def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_bodies=True, align_only_trans=False,
@@ -172,20 +123,19 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
 
     model_kwargs_1 = {}
     model_kwargs_1['y'] = {}
-    model_kwargs_1['y']['length'] = [lengths[1] - slerp_window_size + 4] 
+    model_kwargs_1['y']['length'] = [lengths[1] - slerp_window_size + args.inpainting_frames] 
     model_kwargs_1['y']['text'] = [texts[1]]
-    model_kwargs_1['y']['mask'] = lengths_to_mask([lengths[1] + 4 - slerp_window_size], dist_util.dev()).unsqueeze(1).unsqueeze(2)
+    model_kwargs_1['y']['mask'] = lengths_to_mask([lengths[1] + args.inpainting_frames - slerp_window_size], dist_util.dev()).unsqueeze(1).unsqueeze(2)
     model_kwargs_1['y']['scale'] = torch.ones(args.batch_size, device=dist_util.dev()) * args.guidance_param
 
     sample_fn = diffusion.p_sample_loop_inpainting
 
 
-
     sample_0, sample_1 = sample_fn(
             model,
-            4,
+            args.inpainting_frames,
             (args.batch_size, model.njoints, model.nfeats, lengths[0]),
-            (args.batch_size, model.njoints, model.nfeats, lengths[1] + 4 - slerp_window_size),
+            (args.batch_size, model.njoints, model.nfeats, lengths[1] + args.inpainting_frames - slerp_window_size),
             clip_denoised=False,
             model_kwargs_0=model_kwargs_0,
             model_kwargs_1=model_kwargs_1,
@@ -197,7 +147,23 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
             const_noise=False,
         )
     print(sample_1.shape)
-    sample_1 = sample_1[:,:,:,4:]
+    sample_1 = sample_1[:,:,:,args.inpainting_frames:] # [bs 135 1 len] 
+    model_kwargs_0["y"]["next_motion"] = sample_1[:,:,:,:args.inpainting_frames]
+    model_kwargs_0['y']['length'] = [lengths[0] + args.inpainting_frames]
+    model_kwargs_0['y']['mask'] = lengths_to_mask(model_kwargs_0['y']['length'], dist_util.dev()).unsqueeze(1).unsqueeze(2)
+    sample_fn = diffusion.p_sample_loop
+    sample_0_refine = sample_fn(
+        model,
+        (args.batch_size, model.njoints, model.nfeats, lengths[0] + args.inpainting_frames),
+        model_kwargs=model_kwargs_0,
+        progress=True
+    )
+    mix_mask = generate_mask(sample_0.shape, 0.9)
+    mix_mask = mix_mask.to(sample_0.device)
+    # sample_0_refine.to(sample_0.device)
+    sample_0_refine = sample_0_refine[:,:,:,:lengths[0]]
+    # sample_0 = (sample_0 * mix_mask) + (sample_0_refine * ~mix_mask)
+    # sample_0 = sample_0  + 0.1 * (sample_0_refine - sample_0)
     print(sample_1.shape)
     sample_0 = sample_0.squeeze().permute(1, 0).cpu()
     sample_1 = sample_1.squeeze().permute(1, 0).cpu()

@@ -315,7 +315,10 @@ class GaussianDiffusion:
         if 'hist_motion' in model_kwargs['y'].keys():
             hist_len =  model_kwargs['y']['hist_motion'].shape[-1]
             model_output[:,:,:,:hist_len] = model_kwargs['y']['hist_motion']
-            
+        elif 'next_motion' in model_kwargs['y'].keys():
+            next_len = model_kwargs['y']['next_motion'].shape[-1]
+            model_output[:,:,:,-next_len:] = model_kwargs['y']['next_motion']
+
         if self.model_var_type in [ModelVarType.LEARNED, ModelVarType.LEARNED_RANGE]:
             assert model_output.shape == (B, C * 2, *x.shape[2:])
             model_output, model_var_values = th.split(model_output, C, dim=1)
