@@ -805,7 +805,8 @@ class GaussianDiffusion:
                 dump.append(deepcopy(sample["sample"]))
             final_0 = sample
         
-        model_kwargs_1['y']['hist_motion'] = final_0['sample'][:,:,:,-hist_frames:]
+        if hist_frames > 0:
+            model_kwargs_1['y']['hist_motion'] = final_0['sample'][:,:,:,-hist_frames:]
         # model_kwargs_1['y']['hist_motion'] = [len + ]
         # shape_1 = (shape_1[0], shape_1[1], shape_1[2], shape_1[3] +  hist_frames)
         

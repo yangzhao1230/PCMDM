@@ -346,7 +346,8 @@ class CompCCDGeneratedDataset(Dataset):
                         const_noise=False,
                         # when experimenting guidance_scale we want to nutrileze the effect of noise on generation
                     )
-                    sample_1 = sample_1[:,:,:,args.inpainting_frames:] # B 135 1 L
+                    if args.inpainting_frames > 0:
+                        sample_1 = sample_1[:,:,:,args.inpainting_frames:] # B 135 1 L
                     if args.refine:
                         model_kwargs_0["y"]["next_motion"] = sample_1[:,:,:,:args.inpainting_frames]
                         model_kwargs_0['y']['length'] = [len + args.inpainting_frames
