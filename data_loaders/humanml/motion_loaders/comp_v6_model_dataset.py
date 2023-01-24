@@ -276,6 +276,8 @@ class CompCCDGeneratedDataset(Dataset):
         sample_fn = (
             diffusion.p_sample_loop_inpainting if not use_ddim else diffusion.ddim_sample_loop
         )
+        if args.refine:
+            sample_fn_refine = diffusion.p_sample_loop
 
         real_num_batches = len(dataloader)
         if num_samples_limit is not None:
@@ -344,7 +346,28 @@ class CompCCDGeneratedDataset(Dataset):
                         const_noise=False,
                         # when experimenting guidance_scale we want to nutrileze the effect of noise on generation
                     )
-                    sample_1 = sample_1[:,:,:,args.inpainting_frames:]
+                    sample_1 = sample_1[:,:,:,args.inpainting_frames:] # B 135 1 L
+                    if args.refine:
+                        model_kwargs_0["y"]["next_motion"] = sample_1[:,:,:,:args.inpainting_frames]
+                        model_kwargs_0['y']['length'] = [len + args.inpainting_frames
+                                                        for len in model_kwargs_0['y']['length']]
+                        model_kwargs_0['y']['mask'] = lengths_to_mask(model_kwargs_0['y']['length'], dist_util.dev()).unsqueeze(1).unsqueeze(2)
+                        sample_0_refine = sample_fn_refine( # bs 135 1 len+inpainting 
+                                                    model,
+                                                    (bs, 135, 1, model_kwargs_0['y']['mask'].shape[-1]),
+                                                    clip_denoised=False,
+                                                    model_kwargs=model_kwargs_0,
+                                                    skip_timesteps=0, 
+                                                    init_image=None,
+                                                    progress=True,
+                                                    dump_steps=None,
+                                                    noise=None,
+                                                    const_noise=False)
+                        sample_0_refine = sample_0_refine[:,:,:,:-args.inpainting_frames]
+                        sample_0 = sample_0  + args.refine_scale * (sample_0_refine - sample_0)
+                        # model_kwargs_0['y']['length'] = [len - args.inpainting_frames
+                        #                                 for len in model_kwargs_0['y']['length']]
+
                     sample_0 = sample_0.squeeze().permute(0, 2, 1).cpu().numpy() # B L D
                     sample_1 = sample_1.squeeze().permute(0, 2, 1).cpu().numpy()
                     length_0 = batch['length_0']

@@ -317,7 +317,10 @@ class GaussianDiffusion:
             model_output[:,:,:,:hist_len] = model_kwargs['y']['hist_motion']
         elif 'next_motion' in model_kwargs['y'].keys():
             next_len = model_kwargs['y']['next_motion'].shape[-1]
-            model_output[:,:,:,-next_len:] = model_kwargs['y']['next_motion']
+            for idx in range(B):
+                len  = model_kwargs['y']['length'][idx]
+                model_output[idx,:,:,len-next_len:len] = model_kwargs['y']['next_motion'][idx,:,:,:]
+            # model_output[:,:,:,-next_len:] = model_kwargs['y']['next_motion']
 
         if self.model_var_type in [ModelVarType.LEARNED, ModelVarType.LEARNED_RANGE]:
             assert model_output.shape == (B, C * 2, *x.shape[2:])

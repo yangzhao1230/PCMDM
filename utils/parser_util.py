@@ -62,6 +62,8 @@ def add_base_options(parser):
     group.add_argument("--seed", default=10, type=int, help="For fixing random seed.")
     group.add_argument("--batch_size", default=64, type=int, help="Batch size during training.")
     group.add_argument("--tiny", default=False, type=bool, help="If True, use only part of data")
+    group.add_argument("--refine", default=False, type=bool, help="refine")
+
 
 def add_diffusion_options(parser):
     group = parser.add_argument_group('diffusion')
@@ -97,7 +99,8 @@ def add_model_options(parser):
     group.add_argument("--hist_frames", default=0, type=int, help="hist_frames")
     group.add_argument("--motion_mask", default=True, type=bool, help="if mask")
     group.add_argument("--inpainting_frames", default=4, type=int, help="inpainting_frames")
-    group.add_argument("--refine_sacle", default=1.0, type=float, help="inpainting_frames")
+    group.add_argument("--refine_scale", default=1.0, type=float, help="inpainting_frames")
+    # group.add_argument("--refine", action='store_true',)
 
 def add_data_options(parser):
     group = parser.add_argument_group('dataset')

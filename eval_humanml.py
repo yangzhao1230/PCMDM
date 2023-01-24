@@ -237,6 +237,9 @@ if __name__ == '__main__':
     log_file = os.path.join(os.path.dirname(args.model_path), 'eval_humanml_{}_{}'.format(name, niter))
     if args.guidance_param != 1.:
         log_file += f'_gscale{args.guidance_param}'
+    log_file += f'_inpaint{args.inpainting_frames}'
+    if args.refine:
+        log_file += f'_refine{args.refine_scale}'
     log_file += f'_{args.eval_mode}'
     log_file += '.log'
 
