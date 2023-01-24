@@ -138,4 +138,5 @@ dmypy.json
 
 /all_checkpoints
 
+# video
 /video

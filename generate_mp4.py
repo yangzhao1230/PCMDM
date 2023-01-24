@@ -67,7 +67,7 @@ def main():
     transforms = dataset.transforms
     # transforms.rots2joints.jointstype = 'mmmns'
 
-    texts = ['sit cross legs', 'stand']
+    texts = ['climb down ladder', 'steps left']
     texts_list = (['walk in circle', 'sit down'],
                 ['throw', 'catch'],
                 ['climb down ladder', 'steps left'],
@@ -99,16 +99,16 @@ def main():
                             align_only_trans=align_trans,
                             slerp_window_size=slerp_ws,
                             return_type=return_type)
-    np.save(f'results_mp4.npy',
-            {'vertices': motion['vertices'].numpy(),
-                'rots': motion['rots'].numpy(),
-                'transl': motion['transl'].numpy(),
-                'text': texts,
-                'lengths': lengths} 
-            ) 
+    # np.save(f'video/results_mp4.npy',
+    #         {'vertices': motion['vertices'].numpy(),
+    #             'rots': motion['rots'].numpy(),
+    #             'transl': motion['transl'].numpy(),
+    #             'text': texts,
+    #             'lengths': lengths} 
+    #         ) 
     motion = motion['vertices'].numpy()
     vid_ = visualize_meshes(motion)
-    save_video_samples(vid_, f'video/{file_name_without_mix}.mp4', texts, fps=30)
+    save_video_samples(vid_, f'video/{file_name}.mp4', texts, fps=30)
 
 
 def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_bodies=True, align_only_trans=False,
@@ -155,15 +155,21 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
     sample_0_refine = sample_fn(
         model,
         (args.batch_size, model.njoints, model.nfeats, lengths[0] + args.inpainting_frames),
+        clip_denoised=False,
         model_kwargs=model_kwargs_0,
-        progress=True
-    )
+        skip_timesteps=0,  # 0 is the default value - i.e. don't skip any step
+        init_image=None,
+        progress=True,
+        dump_steps=None,
+        noise=None,
+        const_noise=False,
+)
     mix_mask = generate_mask(sample_0.shape, 0.9)
     mix_mask = mix_mask.to(sample_0.device)
     # sample_0_refine.to(sample_0.device)
     sample_0_refine = sample_0_refine[:,:,:,:lengths[0]]
     # sample_0 = (sample_0 * mix_mask) + (sample_0_refine * ~mix_mask)
-    # sample_0 = sample_0  + 0.1 * (sample_0_refine - sample_0)
+    sample_0 = sample_0  + 1 * (sample_0_refine - sample_0)
     print(sample_1.shape)
     sample_0 = sample_0.squeeze().permute(1, 0).cpu()
     sample_1 = sample_1.squeeze().permute(1, 0).cpu()
