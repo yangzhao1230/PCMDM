@@ -97,6 +97,7 @@ def add_model_options(parser):
     group.add_argument("--hist_frames", default=0, type=int, help="hist_frames")
     group.add_argument("--motion_mask", default=True, type=bool, help="if mask")
     group.add_argument("--inpainting_frames", default=4, type=int, help="inpainting_frames")
+    group.add_argument("--refine_sacle", default=1.0, type=float, help="inpainting_frames")
 
 def add_data_options(parser):
     group = parser.add_argument_group('dataset')

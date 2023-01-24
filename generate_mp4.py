@@ -86,7 +86,7 @@ def main():
     # for text in texts_list:
 
     file_name = texts[0] + '_' + texts[1]
-    lengths = [45, 45]
+    lengths = [90, 90]
     slerp_ws = 0
     return_type="smpl"
     motion = forward_seq(args, 
@@ -108,7 +108,7 @@ def main():
     #         ) 
     motion = motion['vertices'].numpy()
     vid_ = visualize_meshes(motion)
-    save_video_samples(vid_, f'video/{file_name}.mp4', texts, fps=30)
+    save_video_samples(vid_, f'save/video/{file_name}.mp4', texts, fps=30)
 
 
 def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_bodies=True, align_only_trans=False,
