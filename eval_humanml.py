@@ -242,7 +242,7 @@ if __name__ == '__main__':
         log_file += f'_refine{args.refine_scale}'
     log_file += f'_{args.eval_mode}'
     log_file += '.log'
-
+    print(args)
     print(f'Will save to log file [{log_file}]')
 
     print(f'Eval mode [{args.eval_mode}]')
