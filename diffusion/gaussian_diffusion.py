@@ -805,8 +805,14 @@ class GaussianDiffusion:
                 dump.append(deepcopy(sample["sample"]))
             final_0 = sample
         
+        B = shape_0[0]
         if hist_frames > 0:
-            model_kwargs_1['y']['hist_motion'] = final_0['sample'][:,:,:,-hist_frames:]
+            # FIXME
+            hist_motion = torch.ones(B, 135, 1, hist_frames)
+            for idx in range(B):
+                len  = model_kwargs_0['y']['length'][idx]
+                hist_motion[idx,:,:,:] = final_0['sample'][idx,:,:,len-hist_frames:len]
+            model_kwargs_1['y']['hist_motion'] = hist_motion
         # model_kwargs_1['y']['hist_motion'] = [len + ]
         # shape_1 = (shape_1[0], shape_1[1], shape_1[2], shape_1[3] +  hist_frames)
         
