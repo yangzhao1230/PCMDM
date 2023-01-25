@@ -67,7 +67,8 @@ def main():
     transforms = dataset.transforms
     # transforms.rots2joints.jointstype = 'mmmns'
 
-    texts = ['climb down ladder', 'steps left']
+    texts = ['hold a golf club while look at the ground', 'swing golf club']
+
     texts_list = (['walk in circle', 'sit down'],
                 ['throw', 'catch'],
                 ['climb down ladder', 'steps left'],
@@ -86,7 +87,7 @@ def main():
     # for text in texts_list:
 
     file_name = texts[0] + '_' + texts[1]
-    lengths = [90, 90]
+    lengths = [45, 45]
     slerp_ws = 0
     return_type="smpl"
     motion = forward_seq(args, 
@@ -148,29 +149,29 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
         )
     print(sample_1.shape)
     sample_1 = sample_1[:,:,:,args.inpainting_frames:] # [bs 135 1 len] 
-    model_kwargs_0["y"]["next_motion"] = sample_1[:,:,:,:args.inpainting_frames]
-    model_kwargs_0['y']['length'] = [lengths[0] + args.inpainting_frames]
-    model_kwargs_0['y']['mask'] = lengths_to_mask(model_kwargs_0['y']['length'], dist_util.dev()).unsqueeze(1).unsqueeze(2)
-    sample_fn = diffusion.p_sample_loop
-    sample_0_refine = sample_fn(
-        model,
-        (args.batch_size, model.njoints, model.nfeats, lengths[0] + args.inpainting_frames),
-        clip_denoised=False,
-        model_kwargs=model_kwargs_0,
-        skip_timesteps=0,  # 0 is the default value - i.e. don't skip any step
-        init_image=None,
-        progress=True,
-        dump_steps=None,
-        noise=None,
-        const_noise=False,
-)
-    mix_mask = generate_mask(sample_0.shape, 0.9)
-    mix_mask = mix_mask.to(sample_0.device)
-    # sample_0_refine.to(sample_0.device)
-    sample_0_refine = sample_0_refine[:,:,:,:lengths[0]]
-    # sample_0 = (sample_0 * mix_mask) + (sample_0_refine * ~mix_mask)
-    sample_0 = sample_0  + 1 * (sample_0_refine - sample_0)
-    print(sample_1.shape)
+#     model_kwargs_0["y"]["next_motion"] = sample_1[:,:,:,:args.inpainting_frames]
+#     model_kwargs_0['y']['length'] = [lengths[0] + args.inpainting_frames]
+#     model_kwargs_0['y']['mask'] = lengths_to_mask(model_kwargs_0['y']['length'], dist_util.dev()).unsqueeze(1).unsqueeze(2)
+#     sample_fn = diffusion.p_sample_loop
+#     sample_0_refine = sample_fn(
+#         model,
+#         (args.batch_size, model.njoints, model.nfeats, lengths[0] + args.inpainting_frames),
+#         clip_denoised=False,
+#         model_kwargs=model_kwargs_0,
+#         skip_timesteps=0,  # 0 is the default value - i.e. don't skip any step
+#         init_image=None,
+#         progress=True,
+#         dump_steps=None,
+#         noise=None,
+#         const_noise=False,
+# )
+#     mix_mask = generate_mask(sample_0.shape, 0.9)
+#     mix_mask = mix_mask.to(sample_0.device)
+#     # sample_0_refine.to(sample_0.device)
+#     sample_0_refine = sample_0_refine[:,:,:,:lengths[0]]
+#     # sample_0 = (sample_0 * mix_mask) + (sample_0_refine * ~mix_mask)
+#     sample_0 = sample_0  + 1 * (sample_0_refine - sample_0)
+#     print(sample_1.shape)
     sample_0 = sample_0.squeeze().permute(1, 0).cpu()
     sample_1 = sample_1.squeeze().permute(1, 0).cpu()
     # toslerp_inter = torch.tile(0*sample_1[0], (slerp_window_size, 1))

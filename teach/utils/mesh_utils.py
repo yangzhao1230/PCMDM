@@ -69,7 +69,7 @@ class MeshViewer(object):
 
         self.use_offscreen = use_offscreen
         self.render_wireframe = False
-        assert add_ground_plane and plane_mins is not None
+        # assert add_ground_plane and plane_mins is not None
         self.mat_constructor = pyrender.MetallicRoughnessMaterial
         self.trimesh_to_pymesh = pyrender.Mesh.from_trimesh
 

@@ -91,7 +91,7 @@ def visualize_meshes(vertices, pcd=None, multi_col=None, text="",
     mesh_rec[:, :, 2] -= height_offset
 
     mv = MeshViewer(width=im_width, height=im_height,
-                    add_ground_plane=True, plane_mins=minsxy, 
+                    add_ground_plane=False, plane_mins=minsxy, 
                     use_offscreen=True,
                     bg_color=bg_color)
                 #ground_height=(mesh_rec.detach().cpu().numpy()[0, 0, 6633, 2] - 0.01))
