@@ -166,12 +166,10 @@ def forward_seq(args, model, diffusion, transforms, texts, lengths, align_full_b
             noise=None,
             const_noise=False,
          )
-#     mix_mask = generate_mask(sample_0.shape, 0.9)
-#     mix_mask = mix_mask.to(sample_0.device)
-#     # sample_0_refine.to(sample_0.device)
-    sample_0_refine = sample_0_refine[:,:,:,:lengths[0]]
+
+        sample_0_refine = sample_0_refine[:,:,:,:lengths[0]]
 #     # sample_0 = (sample_0 * mix_mask) + (sample_0_refine * ~mix_mask)
-    sample_0 = sample_0  + args.refine_scale * (sample_0_refine - sample_0)
+        sample_0 = sample_0  + args.refine_scale * (sample_0_refine - sample_0)
 #     print(sample_1.shape)
     sample_0 = sample_0.squeeze().permute(1, 0).cpu()
     sample_1 = sample_1.squeeze().permute(1, 0).cpu()

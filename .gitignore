@@ -140,3 +140,8 @@ dmypy.json
 
 # video
 /video
+
+*.out
+*.txt
+*.mp4
+*.npy

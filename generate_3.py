@@ -67,7 +67,7 @@ def main():
     transforms = dataset.transforms
     # transforms.rots2joints.jointstype = 'mmmns'
 
-    texts = ['walk in circle', 'jump forward', 'sit down']
+    texts = ['throw ball', 'walk like a drunk', 'fall down']
 
     texts_list = (['walk in circle', 'sit down'],
                 ['throw', 'catch'],

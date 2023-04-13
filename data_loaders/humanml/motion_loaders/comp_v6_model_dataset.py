@@ -16,7 +16,7 @@ def build_models(opt):
                                         device=opt.device)
         text_size = opt.dim_text_hidden * 2
     else:
-        raise Exception("Text Encoder Mode not Recognized!!!")
+        raise Exception('Text Encoder Mode not Recognized!!!')
 
     seq_prior = TextDecoder(text_size=text_size,
                             input_size=opt.dim_att_vec + opt.dim_movement_latent,
@@ -349,15 +349,19 @@ class CompCCDGeneratedDataset(Dataset):
                     if args.inpainting_frames > 0:
                         sample_1 = sample_1[:,:,:,args.inpainting_frames:] # B 135 1 L
                     if args.refine:
-                        model_kwargs_0["y"]["next_motion"] = sample_1[:,:,:,:args.inpainting_frames]
-                        model_kwargs_0['y']['length'] = [len + args.inpainting_frames
+                        model_kwargs_0_refine = {}
+                        model_kwargs_0_refine['y'] = {}
+                        model_kwargs_0_refine['y']['scale'] = model_kwargs_0['y']['scale']
+                        model_kwargs_0_refine['y']['text'] = model_kwargs_0['y']['text']
+                        model_kwargs_0_refine['y']['next_motion'] = sample_1[:,:,:,:args.inpainting_frames]
+                        model_kwargs_0_refine['y']['length'] = [len + args.inpainting_frames
                                                         for len in model_kwargs_0['y']['length']]
-                        model_kwargs_0['y']['mask'] = lengths_to_mask(model_kwargs_0['y']['length'], dist_util.dev()).unsqueeze(1).unsqueeze(2)
+                        model_kwargs_0_refine['y']['mask'] = lengths_to_mask(model_kwargs_0_refine['y']['length'], dist_util.dev()).unsqueeze(1).unsqueeze(2)
                         sample_0_refine = sample_fn_refine( # bs 135 1 len+inpainting 
                                                     model,
-                                                    (bs, 135, 1, model_kwargs_0['y']['mask'].shape[-1]),
+                                                    (bs, 135, 1, model_kwargs_0_refine['y']['mask'].shape[-1]),
                                                     clip_denoised=False,
-                                                    model_kwargs=model_kwargs_0,
+                                                    model_kwargs=model_kwargs_0_refine,
                                                     skip_timesteps=0, 
                                                     init_image=None,
                                                     progress=True,
@@ -466,9 +470,9 @@ class CompTEACHGeneratedDataset(Dataset):
 
     def __init__(self, args, cnt):
         batch_size = 32
-        print(f"loading generated_{cnt}.npy")
+        print(f'loading generated_{cnt}.npy')
         self.generated_motion = []
-        self.data = np.load(f"/home/zhao_yang/project/teach/data/generated_{cnt}.npy", allow_pickle=True)
+        self.data = np.load(f'/home/zhao_yang/project/teach/data/generated_{cnt}.npy', allow_pickle=True)
         def collate_tensor_with_padding(batch):
             batch = [torch.tensor(x) for x in batch]
             dims = batch[0].dim()
@@ -490,9 +494,9 @@ class CompTEACHGeneratedDataset(Dataset):
             len_lst = []
             text_lst = []
             for j in range(i, i + 32):
-                motion_lst.append(self.data[j]["motion"])
-                len_lst.append(self.data[j]["length"])
-                text_lst.append(self.data[j]["text"])
+                motion_lst.append(self.data[j]['motion'])
+                len_lst.append(self.data[j]['length'])
+                text_lst.append(self.data[j]['text'])
 
             motion_arr = collate_tensor_with_padding(motion_lst)
             sub_dicts = [{'motion': motion_arr[bs_i],
